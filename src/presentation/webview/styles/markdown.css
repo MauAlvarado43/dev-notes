@@ -1,0 +1,94 @@
+.markdown-body {
+  font-family: var(--vscode-font-family);
+  font-size: 15px;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.markdown-body > :first-child { margin-top: 0; }
+.markdown-body > :last-child { margin-bottom: 0; }
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 { line-height: 1.25; color: var(--vscode-editor-foreground); }
+
+.markdown-body h1 {
+  margin: 0 0 1em;
+  padding-bottom: .38em;
+  border-bottom: 1px solid var(--soft-border);
+  font-size: 2.05em;
+  letter-spacing: -.025em;
+}
+
+.markdown-body h2 {
+  margin: 1.9em 0 .8em;
+  padding-bottom: .25em;
+  border-bottom: 1px solid var(--soft-border);
+  font-size: 1.48em;
+}
+
+.markdown-body h3 { margin: 1.55em 0 .65em; font-size: 1.2em; }
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote,
+.markdown-body pre,
+.markdown-body table { margin: 0 0 1.15em; }
+
+.markdown-body ul, .markdown-body ol { padding-left: 1.75em; }
+.markdown-body li + li { margin-top: .34em; }
+.markdown-body a { color: var(--vscode-textLink-foreground); text-decoration: none; }
+.markdown-body a:hover { color: var(--vscode-textLink-activeForeground); text-decoration: underline; }
+
+.markdown-body blockquote {
+  margin-left: 0;
+  padding: .25em 1em;
+  border-left: 3px solid var(--vscode-textBlockQuote-border);
+  color: var(--muted);
+  background: var(--vscode-textBlockQuote-background);
+}
+
+.markdown-body code {
+  padding: .16em .38em;
+  border: 1px solid var(--soft-border);
+  border-radius: 5px;
+  color: var(--vscode-textPreformat-foreground);
+  background: var(--vscode-textCodeBlock-background);
+  font-family: var(--vscode-editor-font-family);
+  font-size: .9em;
+}
+
+.markdown-body pre {
+  position: relative;
+  overflow: auto;
+  padding: 18px 20px;
+  border: 1px solid var(--soft-border);
+  border-radius: 10px;
+  background: var(--vscode-textCodeBlock-background);
+}
+
+.markdown-body pre code { padding: 0; border: 0; background: transparent; font-size: 13px; line-height: 1.62; }
+
+.copy-code {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--soft-border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  background: var(--vscode-editorWidget-background);
+  font-size: 11px;
+  transition: opacity .12s;
+}
+
+.markdown-body pre:hover .copy-code, .copy-code:focus { opacity: 1; }
+.markdown-body hr { height: 1px; margin: 2em 0; border: 0; background: var(--soft-border); }
+.markdown-body table { width: 100%; border-spacing: 0; border-collapse: collapse; }
+.markdown-body th, .markdown-body td { padding: 9px 12px; border: 1px solid var(--soft-border); text-align: left; }
+.markdown-body th { background: var(--vscode-editorWidget-background); }
+.markdown-body img { max-width: 100%; border-radius: 8px; }

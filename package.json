@@ -1,0 +1,190 @@
+{
+  "name": "dev-notes",
+  "displayName": "Dev Notes",
+  "description": "%extension.description%",
+  "version": "0.6.0",
+  "publisher": "raide",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MauAlvarado43/dev-notes.git"
+  },
+  "keywords": [
+    "vscode-extension",
+    "notes",
+    "notebook",
+    "markdown",
+    "snippets"
+  ],
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "devNotes.editor",
+        "displayName": "Dev Notes",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "devNotes.board",
+        "displayName": "Dev Notes board",
+        "selector": [
+          {
+            "filenamePattern": "*.board.json"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "devNotes.createNotebook",
+        "title": "%command.createNotebook.title%",
+        "category": "Dev Notes",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "devNotes.createNote",
+        "title": "%command.createNote.title%",
+        "category": "Dev Notes",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "devNotes.createBoard",
+        "title": "%command.createBoard.title%",
+        "category": "Dev Notes",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "devNotes.search",
+        "title": "%command.search.title%",
+        "category": "Dev Notes",
+        "icon": "$(search)"
+      },
+      {
+        "command": "devNotes.refresh",
+        "title": "%command.refresh.title%",
+        "category": "Dev Notes",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "devNotes.openStorage",
+        "title": "%command.openStorage.title%",
+        "category": "Dev Notes",
+        "icon": "$(folder-opened)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devNotes",
+          "title": "Dev Notes",
+          "icon": "media/dev-notes-mark.svg"
+        }
+      ]
+    },
+    "views": {
+      "devNotes": [
+        {
+          "id": "devNotes.notebooks",
+          "name": "%view.notebooks.name%",
+          "type": "webview"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "devNotes.createNotebook",
+          "when": "view == devNotes.notebooks",
+          "group": "navigation@1"
+        },
+        {
+          "command": "devNotes.refresh",
+          "when": "view == devNotes.notebooks",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "devNotes.createNote",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n"
+      },
+      {
+        "command": "devNotes.search",
+        "key": "ctrl+alt+f",
+        "mac": "cmd+alt+f"
+      }
+    ],
+    "configuration": {
+      "title": "%configuration.title%",
+      "properties": {
+        "devNotes.language": {
+          "type": "string",
+          "default": "en",
+          "enum": ["en", "es"],
+          "enumDescriptions": ["%configuration.language.english%", "%configuration.language.spanish%"],
+          "scope": "window",
+          "description": "%configuration.language.description%"
+        },
+        "devNotes.storagePath": {
+          "type": "string",
+          "default": "",
+          "scope": "window",
+          "description": "%configuration.storagePath.description%"
+        },
+        "devNotes.noteTemplate": {
+          "type": "string",
+          "default": "# ${title}\\n\\n",
+          "scope": "window",
+          "description": "%configuration.noteTemplate.description%"
+        },
+        "devNotes.autoSave": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "%configuration.autoSave.description%"
+        },
+        "devNotes.reopenNotesInEditor": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "%configuration.reopenNotesInEditor.description%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test:clean": "node -e \"require('fs').rmSync('dist/test',{recursive:true,force:true})\"",
+    "test": "npm run test:clean && tsc -p tsconfig.test.json && node --test dist/test/test/*.test.js",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "package": "npm run check && vsce package --no-dependencies --out dist/dev-notes.vsix"
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.2"
+  }
+}

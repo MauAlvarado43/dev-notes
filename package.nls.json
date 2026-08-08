@@ -1,0 +1,18 @@
+{
+  "extension.description": "Markdown notebooks for commands, snippets, and development notes.",
+  "view.notebooks.name": "Notebooks",
+  "command.createNotebook.title": "Create notebook",
+  "command.createNote.title": "Create note",
+  "command.createBoard.title": "Create board",
+  "command.search.title": "Search notes",
+  "command.refresh.title": "Refresh",
+  "command.openStorage.title": "Open notes folder",
+  "configuration.title": "Dev Notes",
+  "configuration.language.description": "Language used by Dev Notes.",
+  "configuration.language.english": "English",
+  "configuration.language.spanish": "Spanish",
+  "configuration.storagePath.description": "Folder where notebooks are stored. Empty uses the private VS Code storage. A leading ~ is supported.",
+  "configuration.noteTemplate.description": "Initial content of a note. Use ${title} to insert its name.",
+  "configuration.autoSave.description": "Save notes automatically after editing them in the Dev Notes editor.",
+  "configuration.reopenNotesInEditor.description": "Reopen a note in the Dev Notes editor when VS Code shows it in the plain text editor."
+}

@@ -1,0 +1,18 @@
+{
+  "extension.description": "Notebooks de notas Markdown para comandos, snippets y apuntes de desarrollo.",
+  "view.notebooks.name": "Notebooks",
+  "command.createNotebook.title": "Crear notebook",
+  "command.createNote.title": "Crear nota",
+  "command.createBoard.title": "Crear pizarrón",
+  "command.search.title": "Buscar en notas",
+  "command.refresh.title": "Actualizar",
+  "command.openStorage.title": "Abrir carpeta de notas",
+  "configuration.title": "Dev Notes",
+  "configuration.language.description": "Idioma usado por Dev Notes.",
+  "configuration.language.english": "Inglés",
+  "configuration.language.spanish": "Español",
+  "configuration.storagePath.description": "Carpeta donde se guardan los notebooks. Vacío usa el almacenamiento privado de VS Code. Admite ~ al inicio.",
+  "configuration.noteTemplate.description": "Contenido inicial de una nota. Usa ${title} para insertar su nombre.",
+  "configuration.autoSave.description": "Guarda automáticamente las notas después de editar en el editor de Dev Notes.",
+  "configuration.reopenNotesInEditor.description": "Vuelve a abrir la nota en el editor de Dev Notes cuando VS Code la muestra en el editor de texto."
+}

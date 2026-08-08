@@ -1,0 +1,271 @@
+:root {
+  --page-max: 880px;
+  --toolbar-height: 68px;
+  --soft-border: color-mix(in srgb, var(--vscode-panel-border) 72%, transparent);
+  --card: color-mix(in srgb, var(--vscode-editor-background) 94%, var(--vscode-foreground) 6%);
+  --hover: color-mix(in srgb, var(--vscode-toolbar-hoverBackground) 82%, transparent);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+html, body { color: var(--vscode-editor-foreground); background: var(--vscode-editor-background); }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: var(--toolbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 22px;
+  border-bottom: 1px solid var(--soft-border);
+  background: color-mix(in srgb, var(--vscode-editor-background) 93%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.identity { min-width: 0; display: flex; align-items: center; gap: 12px; }
+
+.note-mark {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--soft-border));
+  border-radius: 10px;
+  color: var(--accent);
+  background: linear-gradient(145deg, var(--accent-soft), color-mix(in srgb, var(--accent-2) 8%, transparent));
+}
+
+.note-mark .icon { width: 19px; height: 19px; stroke-width: 1.5; }
+.identity-copy { min-width: 0; }
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title {
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--soft-border);
+  border-radius: 9px;
+  background: var(--vscode-editorWidget-background);
+}
+
+.mode-button {
+  min-width: 82px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+}
+
+.mode-button:hover { color: var(--vscode-foreground); background: var(--hover); }
+.mode-button.active { color: white; background: linear-gradient(135deg, var(--accent), var(--accent-strong)); }
+
+.attach-button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--soft-border);
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--vscode-editorWidget-background);
+}
+
+.attach-button:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--soft-border)); }
+
+.attachments {
+  padding: 14px 22px 16px;
+  border-bottom: 1px solid var(--soft-border);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+.attachments[hidden] { display: none; }
+
+.attachments-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.attachments-title { display: flex; align-items: center; gap: 7px; }
+.attachments-title .icon { width: 14px; height: 14px; color: var(--accent); }
+.attachments-count { font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+.attachment-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.attachment {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px 7px 10px;
+  border: 1px solid var(--soft-border);
+  border-radius: 9px;
+  background: var(--vscode-editorWidget-background);
+}
+
+.attachment-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.attachment-icon .icon { width: 15px; height: 15px; }
+.attachment-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.attachment-name { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-size { margin-top: 1px; color: var(--muted); font-size: 10px; }
+.attachment-actions { display: flex; flex: 0 0 auto; opacity: 0; transition: opacity .12s; }
+.attachment:hover .attachment-actions, .attachment-actions:focus-within { opacity: 1; }
+
+.attachment-actions .icon-button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+}
+
+.attachment-actions .icon-button:hover { color: var(--vscode-foreground); background: var(--hover); }
+.attachment-actions .icon { width: 14px; height: 14px; }
+
+.status {
+  min-width: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--vscode-testing-iconPassed); }
+.status.saving .status-dot { background: var(--vscode-progressBar-background); animation: pulse 1s ease-in-out infinite; }
+.status.dirty .status-dot { background: var(--vscode-editorWarning-foreground); }
+.status.error { color: var(--vscode-errorForeground); }
+.status.error .status-dot { background: var(--vscode-errorForeground); }
+
+@keyframes pulse { 50% { opacity: .35; transform: scale(.75); } }
+
+.read-layout { display: block; padding: 54px 30px 90px; }
+.read-layout[hidden], .edit-layout[hidden] { display: none; }
+.read-surface { max-width: var(--page-max); margin: 0 auto; }
+
+.edit-layout {
+  height: calc(100vh - var(--toolbar-height));
+  min-height: 420px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+}
+
+.pane { min-width: 0; display: flex; flex-direction: column; }
+.pane + .pane { border-left: 1px solid var(--soft-border); }
+
+.pane-label {
+  height: 36px;
+  flex: 0 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--soft-border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.word-count { font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+#editor {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: 0;
+  outline: 0;
+  padding: 26px 30px 80px;
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-editor-background);
+  font: 14px/1.72 var(--vscode-editor-font-family);
+  tab-size: var(--vscode-editor-tabSize, 4);
+  caret-color: var(--accent);
+}
+
+#editor::selection { background: var(--vscode-editor-selectionBackground); }
+.live-preview { flex: 1; overflow: auto; padding: 26px 34px 80px; background: var(--card); }
+.empty { display: grid; min-height: 52vh; place-items: center; text-align: center; color: var(--muted); }
+.empty-card { max-width: 360px; padding: 34px; border: 1px dashed var(--soft-border); border-radius: 14px; }
+.empty-title { margin-bottom: 8px; color: var(--vscode-foreground); font-size: 17px; font-weight: 600; }
+
+kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--soft-border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font: 11px var(--vscode-font-family);
+  background: var(--vscode-editorWidget-background);
+}
+
+@media (max-width: 760px) {
+  .topbar { align-items: flex-start; padding: 10px 14px; }
+  .toolbar { gap: 7px; }
+  .attachments { padding: 12px 14px 14px; }
+  .attachment-list { grid-template-columns: 1fr; }
+  .attachment-actions { opacity: 1; }
+  .status { display: none; }
+  .mode-button { min-width: 68px; }
+  .edit-layout { height: auto; min-height: calc(100vh - var(--toolbar-height)); grid-template-columns: 1fr; }
+  .pane { min-height: 58vh; }
+  .pane + .pane { border-left: 0; border-top: 1px solid var(--soft-border); }
+  .read-layout { padding: 34px 20px 70px; }
+  #editor, .live-preview { padding-left: 20px; padding-right: 20px; }
+}

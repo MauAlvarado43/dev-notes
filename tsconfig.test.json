@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "dist/test",
+    "noEmit": false,
+    "types": ["node"]
+  },
+  "include": [
+    "src/core/types.ts",
+    "src/core/utils.ts",
+    "src/core/i18n/catalog.ts",
+    "src/domain/notes.ts",
+    "src/domain/markdown.ts",
+    "src/domain/attachments.ts",
+    "src/domain/boards.ts",
+    "test/*.test.ts"
+  ]
+}
