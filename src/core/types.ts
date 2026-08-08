@@ -23,7 +23,42 @@ export interface NotebookSummary {
   boards: BoardSummary[];
 }
 
-export type BoardElementKind = 'pen' | 'rectangle' | 'ellipse' | 'arrow' | 'line' | 'text';
+/** Shapes drawn from two corners. Everything past `ellipse` is a diagram shape. */
+export type BoardShapeKind =
+  | 'rectangle'
+  | 'roundRect'
+  | 'ellipse'
+  | 'triangle'
+  | 'diamond'
+  | 'parallelogram'
+  | 'hexagon'
+  | 'cylinder'
+  | 'note'
+  | 'umlClass'
+  | 'entity'
+  | 'package'
+  | 'actor';
+
+export type BoardElementKind = 'pen' | 'line' | 'arrow' | 'connector' | 'text' | 'image' | BoardShapeKind;
+
+export type BoardExportFormat = 'png' | 'svg';
+
+/** Line ending, so one connector covers flowchart, UML, and ER notations. */
+export type BoardCap = 'none' | 'arrow' | 'triangle' | 'diamond' | 'filledDiamond' | 'circle' | 'one' | 'many';
+
+export type BoardRoute = 'straight' | 'elbow';
+
+/** Side of an element a connector docks to. `auto` picks the side facing the peer. */
+export type BoardAnchor = 'auto' | 'top' | 'right' | 'bottom' | 'left';
+
+/**
+ * End of a connector. A bound end follows its element, so moving a shape reroutes
+ * every relation touching it; a free end keeps the coordinates in `points`.
+ */
+export interface BoardEndpoint {
+  element?: string;
+  anchor?: BoardAnchor;
+}
 
 export interface BoardElement {
   id: string;
@@ -33,7 +68,18 @@ export interface BoardElement {
   /** Flat `[x0, y0, x1, y1, …]`. Shapes use two corners, text uses one anchor. */
   points: number[];
   filled?: boolean;
+  /** Free text for a text element, and the label of a shape or a connector. */
   text?: string;
+  /** Degrees clockwise around the center of the element. */
+  rotation?: number;
+  dash?: boolean;
+  from?: BoardEndpoint;
+  to?: BoardEndpoint;
+  startCap?: BoardCap;
+  endCap?: BoardCap;
+  route?: BoardRoute;
+  /** File name of an image element, stored in the folder of the board. */
+  src?: string;
 }
 
 export interface BoardDocument {
@@ -99,7 +145,13 @@ export type EditorHostMessage =
 export type BoardClientMessage =
   | { type: 'ready' }
   | { type: 'update'; elements: BoardElement[] }
-  | { type: 'save' };
+  | { type: 'save' }
+  /** Opens the file picker and copies the chosen images next to the board. */
+  | { type: 'pickImages' }
+  /** An image pasted or dropped on the canvas, as base64 with its file name. */
+  | { type: 'addImage'; name: string; data: string }
+  | { type: 'requestExport'; format: BoardExportFormat }
+  | { type: 'export'; format: BoardExportFormat; data: string };
 
 /** Messages the extension host sends to the board webview. */
 export type BoardHostMessage =
@@ -110,6 +162,12 @@ export type BoardHostMessage =
       title: string;
       elements: BoardElement[];
       dirty: boolean;
+      /** Webview URI of every image the board references, keyed by file name. */
+      assets: Record<string, string>;
     }
+  /** Images just stored, ready to be placed on the canvas, keyed by file name. */
+  | { type: 'images'; assets: Record<string, string> }
+  /** Images as data URIs, so the webview can build a standalone export. */
+  | { type: 'exportAssets'; format: BoardExportFormat; assets: Record<string, string> }
   | { type: 'saved' }
   | { type: 'error'; message?: string };

@@ -1,3 +1,4 @@
+import { boardTitle, isBoardFile } from './boards';
 import { noteTitle } from './notes';
 
 /** Hidden folder holding the attachments of every note in a notebook. */
@@ -8,9 +9,12 @@ const UNSAFE_CHARACTERS = /[<>:"|?*]/g;
 const CONTROL_CHARACTERS = /\p{Cc}/gu;
 const FALLBACK_NAME = 'file';
 
-/** Attachments of a note live in `<notebook>/.attachments/<note title>/`. */
-export function attachmentFolder(noteFileName: string): string {
-  return noteTitle(noteFileName);
+/**
+ * Files of an entry live in `<notebook>/.attachments/<title>/`: the attachments
+ * of a note, and the images placed on a board.
+ */
+export function attachmentFolder(fileName: string): string {
+  return isBoardFile(fileName) ? boardTitle(fileName) : noteTitle(fileName);
 }
 
 /**

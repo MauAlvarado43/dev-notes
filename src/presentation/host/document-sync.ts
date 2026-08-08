@@ -19,6 +19,7 @@ interface WriterOptions {
 export class DocumentWriter {
   private pending?: string;
   private applying = false;
+  private written?: string;
   private queue = Promise.resolve();
   private saveTimer?: NodeJS.Timeout;
   private disposed = false;
@@ -28,6 +29,15 @@ export class DocumentWriter {
   /** True while an edit of ours is being applied, so echoes can be ignored. */
   get isApplying(): boolean {
     return this.applying;
+  }
+
+  /**
+   * True when the text is what this writer last produced. Change events can land
+   * after an edit finishes, and a webview that reloads on its own echo throws away
+   * the state it holds, such as the undo history of a board.
+   */
+  isEcho(text: string): boolean {
+    return this.applying || text === this.written;
   }
 
   write(text: string): Promise<void> {
@@ -71,6 +81,7 @@ export class DocumentWriter {
         const wholeDocument = new vscode.Range(0, 0, lastLine.lineNumber, lastLine.range.end.character);
         const edit = new vscode.WorkspaceEdit();
         edit.replace(this.document.uri, wholeDocument, next);
+        this.written = next;
         if (!await vscode.workspace.applyEdit(edit)) throw new LocalizedError('errors.updateFailed');
       }
       this.scheduleSave();

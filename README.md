@@ -6,7 +6,7 @@ Notes never leave the machine. By default they live in the private VS Code stora
 
 ## Project status
 
-The current version is `0.6.0`. Planned changes are tracked in `CHANGELOG.md`.
+The current version is `0.7.0`. Planned changes are tracked in `CHANGELOG.md`.
 
 - Architecture: `docs/ARCHITECTURE.md`
 - Release process: `RELEASE.md`
@@ -18,7 +18,7 @@ The current version is `0.6.0`. Planned changes are tracked in `CHANGELOG.md`.
 - Notebooks holding Markdown notes, with create, rename, and delete flows inside the extension instead of the VS Code input box.
 - Instant search over note titles, notebook names, and note content.
 - A reading-first note editor with live Markdown preview, automatic saving, a save state indicator, and a word counter.
-- Boards: a freeform drawing canvas for sketches and diagrams, stored next to the notes of a notebook.
+- Boards: a drawing canvas for sketches, flowcharts, and UML or entity relationship diagrams, with images and PNG or SVG export, stored next to the notes of a notebook.
 - File attachments copied into the notes folder, listed on the note, and insertable as Markdown references.
 - Copy buttons on code blocks and guarded opening of external links.
 - English and Spanish interface, selected with `devNotes.language`.
@@ -28,7 +28,21 @@ The current version is `0.6.0`. Planned changes are tracked in `CHANGELOG.md`.
 
 A board is a drawing canvas that lives in a notebook next to its notes, as a `<name>.board.json` file. Create one from the type selector of the create form, from the notebook menu, or with `Dev Notes: Create board`; it is renamed and deleted like a note, and the sidebar shows how many elements it holds.
 
-The canvas has pen, rectangle, ellipse, arrow, line, and text tools, six colors, three stroke widths, and an optional fill for shapes. The select tool moves and deletes elements, `Ctrl+Z` and `Ctrl+Y` walk the history, the wheel zooms, and holding space or the middle button pans. Tools also answer to single keys: `V`, `P`, `R`, `O`, `A`, `L`, and `T`.
+The canvas has pen, line, arrow, connector, and text tools, plus a shape palette grouped into basic shapes, flowchart symbols, UML, and entity relationship. Every element takes one of six colors, three stroke widths, an optional fill, and a dashed outline, and shapes and connectors carry a label written with a double click.
+
+Selection works with a click, a rubber band, or the lasso tool for an irregular group. A single selected element gets corner handles to resize it and a grip to rotate it, and linear elements get a handle on each end. The selection can be moved, nudged with the arrow keys, duplicated, sent to the front or the back, and deleted.
+
+Connectors join two shapes and follow them: moving a box reroutes every relation touching it. A connector is drawn as a straight line or with right angles, and its ends carry the notation of the relation, from a plain arrow to inheritance, composition, aggregation, dependency, and the one and many marks of an entity relationship diagram.
+
+The board is meant to be driven from the keyboard, and almost everything is a single letter. Tools: `V` select, `Q` lasso, `P` pen, `L` line, `A` arrow, `C` connector, `T` text, `S` the shape palette, `I` an image, and `R`, `O`, `D`, `G` for the usual shapes. Style: `1` `2` `3` for the stroke, `F` fill, `-` dashed, `K` the next color. View: `Z` fits the drawing, `0` resets it, and the wheel or `Ctrl +` and `Ctrl −` zoom. `E` exports and `H` opens the list of shortcuts.
+
+The selection keeps the combinations the system already owns: `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+D`, `Ctrl+Z`, `Ctrl+Y`, plus `Enter` to write on it, the arrow keys to nudge it, `Ctrl+↑` and `Ctrl+↓` for the drawing order, and `Escape` to drop it. Holding space or the middle button pans.
+
+Every button in the toolbar states its shortcut on hover, and `H` opens the full list. Both come from the same table the board dispatches from, so neither drifts from what the keys actually do.
+
+Images go on a board from the toolbar, by pasting from the clipboard, or by dropping a file on the canvas. Each one is copied into `<notebook>/.attachments/<board>/`, next to the board that draws it, and behaves like any other element: move it, resize it, rotate it, put it behind a shape, or delete it.
+
+The export button, or `E`, writes the whole board as a PNG image or an SVG vector, framed around the drawing with a white background. Images are inlined in the file, so it opens anywhere without the notes folder.
 
 Boards are saved as readable JSON, so they diff, sync, and back up like the notes around them.
 

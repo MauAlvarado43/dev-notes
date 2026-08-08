@@ -52,11 +52,27 @@ Notes stay real `.md` files on disk and boards stay readable JSON. Nothing is du
 
 Edit `src/domain/notes.ts`. Creation, renaming, and the file names sent back by a webview share the same validation, and every rejection throws a `LocalizedError` carrying a catalog key.
 
-### Add a board tool
+### Add a board shape or tool
 
-`BoardCanvas` in `src/presentation/webview/board/canvas.ts` owns pointer handling, the viewport, hit testing, and SVG rendering. A new tool needs its kind in `BoardElementKind`, a shape in `createShape`, a bounding box in `boundingBox` when the default is wrong, an entry in the toolbar list, and its labels in both catalogs. `src/domain/boards.ts` validates what is read back from disk, so a kind that it does not know is dropped when the file is parsed.
+The board bundle is split by responsibility: `canvas.ts` owns pointer handling, the viewport, selection, and the transform drafts; `geometry.ts` holds boxes, rotation, and hit testing; `shapes.ts` describes every shape as paths inside a box; `connectors.ts` resolves the ends of a relation and its line endings; `render.ts` turns an element into SVG; and `toolbar.ts` holds the tool row and the style row.
+
+A new shape needs its kind in `BoardShapeKind`, a case in `shapePlan`, an entry in `SHAPES` with an icon and a catalog key, and its labels in both catalogs. A new tool that is not a shape also needs a branch in `BoardCanvas.startElement` and a row in `TOOLS`. `src/domain/boards.ts` validates what is read back from disk, so a kind that it does not know is dropped when the file is parsed.
+
+Shapes are stored as two corners plus an optional rotation, and connectors store the element each end is bound to instead of coordinates, which is why moving a shape reroutes its relations without rewriting them.
 
 Boards claim `*.board.json` with `priority: "default"`, so VS Code opens them in the canvas without the fallback the notes need.
+
+### Put images on a board and export it
+
+Board images are attachments: `AttachmentStore` stores them under `<notebook>/.attachments/<board title>/`, from the file picker or from bytes pasted on the canvas. The element keeps the file name in `src`, never a path, and the host resolves it twice: as a webview URI in the `document` message so the canvas can draw it, and as a data URI when an export is requested.
+
+Exporting runs in the webview, in `board/export.ts`: the same `renderElement` that paints the canvas builds a standalone document with a white background, framed around the content. PNG is that document drawn onto a canvas element and read back, which stays untainted because every image is already a data URI. The host only chooses the destination and writes the bytes.
+
+### Add a board shortcut
+
+`src/presentation/webview/board/shortcuts.ts` holds every binding: its id, the section it belongs to, its catalog label, and the signatures it answers to. `main.ts` dispatches from that table and `ShortcutHelp` renders the cheat sheet from it, so adding a row is enough for a shortcut to work and to be documented, and a binding without a label cannot ship.
+
+Signatures come from `event.code` for letters and digits and from `event.key` for punctuation, which keeps a binding on the same physical key across keyboard layouts while still matching the character where that is the point. Shortcuts pause while a text field has focus.
 
 ### Work with attachments
 

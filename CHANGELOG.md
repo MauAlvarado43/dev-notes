@@ -6,6 +6,42 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-08
+
+### Added
+
+- Board shape palette with basic shapes, flowchart symbols (decision, input and output, preparation, database, annotation), UML (class, package, actor), and entity relationship entities, on top of the rectangle, rounded rectangle, ellipse, and triangle.
+- Connectors that join two shapes and follow them, drawn straight or with right angles, with the notation of the relation on their ends: arrow, dependency, inheritance, implementation, aggregation, composition, and the one and many marks of an entity relationship diagram.
+- Labels on shapes and connectors, written with a double click on the element. Free text is also written by double clicking on empty canvas.
+- Lasso selection, rubber band selection, and shift clicking, so several elements are picked and then moved, styled, duplicated, or deleted together.
+- Rotation and resizing for the selected element, with corner handles, a rotate grip that snaps to 15° while shift is held, and endpoint handles on lines and connectors.
+- Duplicate, bring to front, and send to back for the selection, a fit to content view button, arrow key nudging, `Ctrl+A`, and `Ctrl+D`.
+- A keyboard layer over the whole board, on single letters wherever the system does not already own the combination: tools on `V`, `Q`, `P`, `L`, `A`, `C`, `T`, `S`, `I`, `R`, `O`, `D`, and `G`; style on `1`, `2`, `3`, `F`, `-`, and `K`; view on `Z`, `0`, and the wheel; `E` to export and `H` for the list. The selection keeps `Ctrl+A`, `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+D`, `Ctrl+Z`, and `Ctrl+Y`, with `Enter` to write on it, arrows to nudge it, `Ctrl+↑` and `Ctrl+↓` for the drawing order, and `Escape` to drop it.
+- Images on a board: inserted from the toolbar, pasted from the clipboard, or dropped on the canvas. Each one is copied into `<notebook>/.attachments/<board>/`, so the board keeps working when the original file moves, and it is moved, resized, rotated, and deleted like any other element.
+- Export a board as a PNG image or an SVG vector, from the toolbar or with `E`. The file is standalone: images are inlined, so it opens outside VS Code.
+- A cheat sheet listing every shortcut, opened with `H` or from the keyboard button in the toolbar, and built from the same table the board dispatches from, so a binding cannot ship undocumented.
+- Every toolbar button states its shortcut in its tooltip, read from that same table, so the keys are learned where the hand already is.
+
+### Changed
+
+- The board toolbar is split in two rows: the tools on top and the appearance of what is being drawn or is selected below. The fill option moved out of the stroke picker into that row, next to the new dashed line option, and both now apply to the selection.
+- The type selector of the create form shows the note and board options as cards with an icon and a description, instead of two unlabeled buttons.
+- Board style controls follow the selection, and fall back to the style of the next stroke when nothing is selected.
+- Board shortcuts read the physical key rather than the character it produces, so bindings stay where they are drawn on keyboard layouts that move letters and digits.
+
+### Fixed
+
+- Undo and redo no longer stop working on a board while `devNotes.autoSave` is on. The editor treated the change event of its own write as an edit made elsewhere, reloaded the canvas, and cleared the history on every stroke.
+- The text tool on a board did nothing. The editor was opened during the pointer event that also moved focus away from it, so the field was blurred and discarded before a character could be typed.
+
+### Validation
+
+- `npm run check` passed with 38 tests, TypeScript validation, and the extension, sidebar, editor, and board bundles.
+- Images and export exercised against the bundle: an image placed from the host lands as an element and draws from the source the host resolved, a board with a missing image draws its frame instead, and the SVG export comes out standalone, framed around the content, with its labels and its images inlined. Exporting an empty board reports it.
+- Tooltips checked against the bundle: each control names its key, including the shape palette, the stroke widths, and the color swatches.
+- Every board shortcut exercised against the bundle: tools, styles, copy, cut, paste, history, order, nudging, zoom, the cheat sheet in both languages, and the check that typing on the canvas does not trigger them.
+- The board webview exercised against a DOM: every shape in the palette drawn, connectors bound to shapes and rerouted when a shape moves, labels written by double click, lasso and rubber band selection, rotation and resizing of a rotated shape, duplicate, reorder, nudging, undo after autosaving, and the Spanish interface. The create form exercised for the note and board type selector.
+
 ## [0.6.0] - 2026-08-08
 
 ### Added

@@ -12,6 +12,10 @@ test('attachments are grouped by the title of the note that owns them', () => {
   assert.equal(attachmentFolder('Release notes.md'), 'Release notes');
 });
 
+test('a board keeps its images in the folder of its own title', () => {
+  assert.equal(attachmentFolder('Arquitectura.board.json'), 'Arquitectura');
+});
+
 test('file names from the operating system are made safe for the notes folder', () => {
   assert.equal(sanitizeAttachmentName('report.pdf'), 'report.pdf');
   assert.equal(sanitizeAttachmentName('quarter/report:2026.pdf'), 'report-2026.pdf');

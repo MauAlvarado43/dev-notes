@@ -72,6 +72,85 @@ test('unusable values fall back instead of reaching the canvas', () => {
   assert.deepEqual(board.elements[0], { id: 'a', kind: 'rectangle', color: '#7c6df2', width: 24, points: [0, 0, 5, 5] });
 });
 
+test('diagram shapes keep their label, rotation, and fill across a round trip', () => {
+  const board = {
+    version: 1,
+    elements: [
+      { id: 'a', kind: 'umlClass' as const, color: '#4bbca2', width: 2, points: [0, 0, 180, 120], filled: true, text: 'Order', rotation: 45 },
+      { id: 'b', kind: 'triangle' as const, color: '#4bbca2', width: 2, points: [0, 0, 40, 40], dash: true }
+    ]
+  };
+
+  assert.deepEqual(parseBoard(serializeBoard(board)), board);
+});
+
+test('a connector keeps the elements it joins and its notation', () => {
+  const connector = {
+    id: 'c',
+    kind: 'connector' as const,
+    color: '#7c6df2',
+    width: 2,
+    points: [0, 0, 50, 50],
+    from: { element: 'a', anchor: 'auto' as const },
+    to: { element: 'b', anchor: 'left' as const },
+    startCap: 'filledDiamond' as const,
+    endCap: 'many' as const,
+    route: 'elbow' as const
+  };
+
+  assert.deepEqual(parseBoard(serializeBoard({ version: 1, elements: [connector] })).elements[0], connector);
+});
+
+test('a connector falls back to a plain arrow when its notation is unusable', () => {
+  const board = parseBoard(JSON.stringify({
+    elements: [{
+      id: 'c',
+      kind: 'connector',
+      color: '#7c6df2',
+      width: 2,
+      points: [0, 0, 10, 10],
+      from: { element: 42 },
+      to: { element: 'b', anchor: 'diagonal' },
+      startCap: 'spike',
+      endCap: 'triangle',
+      route: 'curved'
+    }]
+  }));
+
+  assert.deepEqual(board.elements[0], {
+    id: 'c',
+    kind: 'connector',
+    color: '#7c6df2',
+    width: 2,
+    points: [0, 0, 10, 10],
+    to: { element: 'b', anchor: 'auto' },
+    startCap: 'none',
+    endCap: 'triangle',
+    route: 'straight'
+  });
+});
+
+test('rotation is normalized into a single turn', () => {
+  const rotated = (rotation: unknown): number | undefined => parseBoard(JSON.stringify({
+    elements: [{ id: 'a', kind: 'rectangle', color: '#fff', width: 2, points: [0, 0, 4, 4], rotation }]
+  })).elements[0]?.rotation;
+
+  assert.equal(rotated(450), 90);
+  assert.equal(rotated(-90), 270);
+  assert.equal(rotated(0), undefined);
+  assert.equal(rotated('45deg'), undefined);
+});
+
+test('an image keeps the file it draws, and is dropped when it has none', () => {
+  const image = { id: 'i', kind: 'image' as const, color: '#7c6df2', width: 1, points: [0, 0, 120, 80], src: 'shot.png' };
+  assert.deepEqual(parseBoard(serializeBoard({ version: 1, elements: [image] })).elements[0], image);
+
+  const orphan = parseBoard(JSON.stringify({
+    elements: [{ id: 'i', kind: 'image', color: '#fff', width: 1, points: [0, 0, 10, 10] }]
+  }));
+  assert.deepEqual(orphan.elements, []);
+});
+
 test('text drawn on a board is searchable from the sidebar', () => {
   const board = {
     version: 1,

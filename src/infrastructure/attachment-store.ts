@@ -47,6 +47,22 @@ export class AttachmentStore {
     return stored;
   }
 
+  /** Stores bytes that never were a file, such as an image pasted on a board. */
+  async write(noteUri: vscode.Uri, files: ReadonlyArray<{ name: string; data: string }>): Promise<string[]> {
+    const folder = this.folder(noteUri);
+    await vscode.workspace.fs.createDirectory(folder);
+    const taken = (await readDirectory(folder)).map(([entry]) => entry);
+    const stored: string[] = [];
+
+    for (const file of files) {
+      const name = uniqueAttachmentName(file.name, [...taken, ...stored]);
+      await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(folder, name), Buffer.from(file.data, 'base64'));
+      stored.push(name);
+    }
+
+    return stored;
+  }
+
   async remove(noteUri: vscode.Uri, name: string): Promise<void> {
     await vscode.workspace.fs.delete(await this.resolve(noteUri, name), { recursive: false, useTrash: true });
   }

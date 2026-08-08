@@ -1,26 +1,29 @@
 import { defaultLocale, isAppLocale } from '@/core/i18n/catalog';
-import type { BoardClientMessage, BoardElement, BoardHostMessage } from '@/core/types';
+import type {
+  BoardClientMessage,
+  BoardElement,
+  BoardExportFormat,
+  BoardHostMessage,
+  BoardRoute
+} from '@/core/types';
 import { element } from '@/presentation/webview/components/dom';
 import { icon, mountIconSprite } from '@/presentation/webview/components/icons';
 import { setLocale, t } from '@/presentation/webview/i18n/messages';
 import { onHostMessage, send } from '@/presentation/webview/platform/vscode';
 import '@/presentation/webview/styles/base.css';
 import '@/presentation/webview/styles/board.css';
-import { BoardCanvas, type BoardTool } from './canvas';
+import { BoardCanvas, type BoardTool, type TextRequest } from './canvas';
+import { RELATION_PRESETS } from './connectors';
+import { boardPng, boardSvg, svgSize } from './export';
+import { ShortcutHelp } from './shortcut-help';
+import { findShortcut } from './shortcuts';
+import { openTextEditor } from './text-editor';
 import { BOARD_COLORS, BoardToolbar, STROKE_WIDTHS } from './toolbar';
 
 const HISTORY_LIMIT = 100;
-
-/** Single-key shortcuts, in the order of the toolbar. */
-const TOOL_KEYS: Record<string, BoardTool> = {
-  v: 'select',
-  p: 'pen',
-  r: 'rectangle',
-  o: 'ellipse',
-  a: 'arrow',
-  l: 'line',
-  t: 'text'
-};
+const NUDGE = 1;
+const NUDGE_FAR = 10;
+const PASTE_OFFSET = 16;
 
 const root = document.getElementById('root') as HTMLElement;
 
@@ -29,27 +32,43 @@ mountIconSprite(root);
 
 let history: BoardElement[][] = [[]];
 let historyIndex = 0;
+let loaded = false;
 let color = BOARD_COLORS[0] as string;
 let stroke = STROKE_WIDTHS[0] as number;
+let filled = false;
+let dashed = false;
+/** Elements copied with the keyboard, pasted back into this board. */
+let clipboard: BoardElement[] = [];
 
 const toolbar = new BoardToolbar({
   onTool: (tool) => selectTool(tool),
-  onColor: (next) => {
-    color = next;
-    canvas.setColor(next);
-    toolbar.setColor(next);
+  onColor: applyColor,
+  onStroke: applyStroke,
+  onFill: applyFill,
+  onDash: applyDash,
+  onRelation: (id) => {
+    const preset = RELATION_PRESETS.find((candidate) => candidate.id === id);
+    if (!preset) return;
+    canvas.setStyle({ startCap: preset.startCap, endCap: preset.endCap, dash: preset.dash });
+    canvas.applyToSelection({ startCap: preset.startCap, endCap: preset.endCap, dash: preset.dash || undefined });
+    toolbar.setRelation(id);
   },
-  onStroke: (width) => {
-    stroke = width;
-    canvas.setStroke(width);
-    toolbar.setStroke(width);
+  onRoute: (route: BoardRoute) => {
+    canvas.setStyle({ route });
+    canvas.applyToSelection({ route });
+    toolbar.setRoute(route);
   },
-  onFill: (filled) => canvas.setFill(filled),
   onUndo: () => travel(-1),
   onRedo: () => travel(1),
+  onDuplicate: () => canvas.duplicateSelection(),
+  onReorder: (direction) => canvas.reorderSelection(direction),
   onDelete: () => canvas.deleteSelection(),
   onZoom: (factor) => canvas.zoomBy(factor),
-  onResetView: () => canvas.resetView()
+  onFit: () => canvas.fitView(),
+  onResetView: () => canvas.resetView(),
+  onHelp: () => help.toggle(),
+  onImage: () => post({ type: 'pickImages' }),
+  onExport: (format) => post({ type: 'requestExport', format })
 });
 
 const canvas = new BoardCanvas({
@@ -57,9 +76,12 @@ const canvas = new BoardCanvas({
     record(elements);
     persist(elements);
   },
-  onSelectionChange: (hasSelection) => toolbar.setSelection(hasSelection),
+  onSelectionChange: (selected) => {
+    toolbar.setSelection(selected);
+    if (!selected.length) showDrawingStyle();
+  },
   onViewChange: (scale) => toolbar.setZoom(scale),
-  onTextRequest: (point, screen) => openTextEditor(point, screen)
+  onTextRequest: (request) => editText(request)
 });
 
 const banner = element('div', 'board-banner');
@@ -83,54 +105,58 @@ mark.append(icon('board'));
 const identity = element('header', 'board-identity');
 identity.append(mark, identityCopy);
 
-root.append(identity, toolbar.node, banner, surface);
+const help = new ShortcutHelp();
 
-selectTool('pen');
-canvas.setColor(color);
-canvas.setStroke(stroke);
-toolbar.setColor(color);
-toolbar.setStroke(stroke);
+root.append(identity, toolbar.node, banner, surface, help.node);
+
+selectTool('select');
+canvas.setStyle({ color, width: stroke });
+showDrawingStyle();
 
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Shift') canvas.setShiftHeld(true);
   if (event.code === 'Space' && !isTyping(event.target)) {
+    event.preventDefault();
     canvas.setSpaceHeld(true);
 
     return;
   }
   if (isTyping(event.target)) return;
 
-  const shortcut = TOOL_KEYS[event.key.toLowerCase()];
-  if (shortcut && !event.ctrlKey && !event.metaKey) {
+  const shortcut = findShortcut(event);
+  if (shortcut) {
     event.preventDefault();
-    selectTool(shortcut);
+    run(shortcut.id);
 
     return;
   }
-  if (event.key === 'Delete' || event.key === 'Backspace') {
-    event.preventDefault();
-    canvas.deleteSelection();
 
-    return;
-  }
-  if (!(event.ctrlKey || event.metaKey)) return;
+  // Arrows move the selection, and are not in the table because they are a group.
+  const step = event.shiftKey ? NUDGE_FAR : NUDGE;
+  if (event.key === 'ArrowLeft') nudge(-step, 0, event);
+  if (event.key === 'ArrowRight') nudge(step, 0, event);
+  if (event.key === 'ArrowUp') nudge(0, -step, event);
+  if (event.key === 'ArrowDown') nudge(0, step, event);
+});
 
-  const key = event.key.toLowerCase();
-  if (key === 'z') {
-    event.preventDefault();
-    travel(event.shiftKey ? 1 : -1);
-  }
-  if (key === 'y') {
-    event.preventDefault();
-    travel(1);
-  }
-  if (key === 's') {
-    event.preventDefault();
-    post({ type: 'save' });
-  }
+document.addEventListener('paste', (event) => {
+  const files = [...(event.clipboardData?.files ?? [])];
+  if (!files.length || isTyping(event.target)) return;
+  event.preventDefault();
+  void sendImages(files);
+});
+
+surface.addEventListener('dragover', (event) => event.preventDefault());
+surface.addEventListener('drop', (event) => {
+  const files = [...(event.dataTransfer?.files ?? [])];
+  if (!files.length) return;
+  event.preventDefault();
+  void sendImages(files);
 });
 
 document.addEventListener('keyup', (event) => {
   if (event.code === 'Space') canvas.setSpaceHeld(false);
+  if (event.key === 'Shift') canvas.setShiftHeld(false);
 });
 
 onHostMessage<BoardHostMessage>((message) => {
@@ -140,10 +166,15 @@ onHostMessage<BoardHostMessage>((message) => {
       identityEyebrow.textContent = message.notebook;
       identityTitle.textContent = message.title;
       banner.hidden = true;
-      canvas.setElements(message.elements);
-      resetHistory(message.elements);
-      updateHint();
+      canvas.setAssets(message.assets);
+      receive(message.elements);
       toolbar.setStatus(message.dirty ? 'dirty' : '', message.dirty ? t('editor.statusDirty') : t('editor.statusSaved'));
+      break;
+    case 'images':
+      canvas.addImages(message.assets);
+      break;
+    case 'exportAssets':
+      void exportBoard(message.format, message.assets);
       break;
     case 'saved':
       toolbar.setStatus('', t('editor.statusSaved'));
@@ -158,49 +189,210 @@ onHostMessage<BoardHostMessage>((message) => {
 
 post({ type: 'ready' });
 
+/** Runs a shortcut by its id in the table. Tools share the `tool.` prefix. */
+function run(id: string): void {
+  if (id.startsWith('tool.')) {
+    selectTool(id.slice('tool.'.length) as BoardTool);
+
+    return;
+  }
+
+  const actions: Record<string, () => void> = {
+    shapes: () => toolbar.openShapes(),
+    selectAll: () => canvas.selectAll(),
+    deselect: () => dismiss(),
+    editText: () => canvas.editSelection(),
+    duplicate: () => canvas.duplicateSelection(),
+    copy: () => copySelection(),
+    cut: () => {
+      copySelection();
+      canvas.deleteSelection();
+    },
+    paste: () => canvas.insertElements(clipboard, PASTE_OFFSET),
+    delete: () => canvas.deleteSelection(),
+    bringToFront: () => canvas.reorderSelection('front'),
+    sendToBack: () => canvas.reorderSelection('back'),
+    undo: () => travel(-1),
+    redo: () => travel(1),
+    fill: () => applyFill(!filled),
+    dash: () => applyDash(!dashed),
+    strokeThin: () => applyStroke(STROKE_WIDTHS[0] as number),
+    strokeMedium: () => applyStroke(STROKE_WIDTHS[1] as number),
+    strokeThick: () => applyStroke(STROKE_WIDTHS[2] as number),
+    nextColor: () => stepColor(),
+    zoomIn: () => canvas.zoomBy(1.2),
+    zoomOut: () => canvas.zoomBy(1 / 1.2),
+    resetView: () => canvas.resetView(),
+    fitView: () => canvas.fitView(),
+    insertImage: () => post({ type: 'pickImages' }),
+    exportBoard: () => toolbar.openExport(),
+    help: () => help.toggle(),
+    save: () => post({ type: 'save' })
+  };
+
+  actions[id]?.();
+}
+
+/**
+ * Builds the picture out of the elements, with the images the host inlined, and
+ * hands the bytes back for saving. An empty board says so instead of writing a
+ * blank file.
+ */
+async function exportBoard(format: BoardExportFormat, assets: Record<string, string>): Promise<void> {
+  const elements = canvas.getElements();
+  if (!elements.length) {
+    showBanner(t('board.exportEmpty'));
+
+    return;
+  }
+
+  try {
+    const byId = (id: string): BoardElement | undefined => elements.find((element) => element.id === id);
+    const source = boardSvg(elements, byId, assets);
+    if (format === 'svg') {
+      post({ type: 'export', format, data: source });
+
+      return;
+    }
+
+    const { width, height } = svgSize(source);
+    post({ type: 'export', format, data: await boardPng(source, width, height) });
+  } catch {
+    showBanner(t('board.exportFailed'));
+  }
+}
+
+function showBanner(message: string): void {
+  banner.textContent = message;
+  banner.hidden = false;
+}
+
+/** Images arriving from the clipboard or a drop are stored by the host first. */
+async function sendImages(files: readonly File[]): Promise<void> {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const data = await file.arrayBuffer();
+    post({ type: 'addImage', name: file.name || imageName(file.type), data: toBase64(data) });
+  }
+}
+
+function imageName(mime: string): string {
+  const extension = mime.slice('image/'.length).split('+')[0] || 'png';
+
+  return `pasted-${Date.now().toString(36)}.${extension}`;
+}
+
+function toBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+
+  return btoa(binary);
+}
+
+function dismiss(): void {
+  if (help.isOpen) {
+    help.close();
+
+    return;
+  }
+  toolbar.dismiss();
+  canvas.clearSelection();
+}
+
+function copySelection(): void {
+  const picked = canvas.selectedElements;
+  if (picked.length) clipboard = picked;
+}
+
+function stepColor(): void {
+  const next = BOARD_COLORS[(BOARD_COLORS.indexOf(color) + 1) % BOARD_COLORS.length];
+  if (next) applyColor(next);
+}
+
+function nudge(dx: number, dy: number, event: KeyboardEvent): void {
+  event.preventDefault();
+  canvas.nudgeSelection(dx, dy);
+}
+
 function selectTool(tool: BoardTool): void {
   canvas.setTool(tool);
   toolbar.setTool(tool);
 }
 
-/** Text is typed in an overlay input placed where the canvas was clicked. */
-function openTextEditor(point: { x: number; y: number }, screen: { left: number; top: number }): void {
-  const input = element('input', 'board-text-input');
-  input.placeholder = t('board.textPlaceholder');
-  input.style.left = `${screen.left}px`;
-  input.style.top = `${screen.top}px`;
-  input.style.color = color;
+/**
+ * Style changes travel the same path from the toolbar and from the keyboard:
+ * they set what the next element will look like, and repaint the selection.
+ */
+function applyColor(next: string): void {
+  color = next;
+  canvas.setStyle({ color: next });
+  canvas.applyToSelection({ color: next });
+  toolbar.setColor(next);
+}
 
-  const close = (): void => input.remove();
-  const commit = (): void => {
-    const text = input.value.trim();
-    close();
-    if (!text) return;
-    canvas.addElement({ id: createId(), kind: 'text', color, width: stroke, points: [point.x, point.y], text });
+function applyStroke(width: number): void {
+  stroke = width;
+  canvas.setStyle({ width });
+  canvas.applyToSelection({ width });
+  toolbar.setStroke(width);
+}
+
+function applyFill(next: boolean): void {
+  filled = next;
+  canvas.setStyle({ filled: next });
+  canvas.applyToSelection({ filled: next || undefined });
+  toolbar.setFill(next);
+}
+
+function applyDash(next: boolean): void {
+  dashed = next;
+  canvas.setStyle({ dash: next });
+  canvas.applyToSelection({ dash: next || undefined });
+  toolbar.setDash(next);
+}
+
+/** With nothing selected the style row shows what the next stroke will look like. */
+function showDrawingStyle(): void {
+  toolbar.setColor(color);
+  toolbar.setStroke(stroke);
+  toolbar.setFill(filled);
+  toolbar.setDash(dashed);
+}
+
+function editText(request: TextRequest): void {
+  openTextEditor(request, (value) => canvas.applyText({ id: request.id, point: request.point }, value));
+}
+
+/**
+ * A document from the host is either the first load, an echo of what was just
+ * drawn, or an edit made elsewhere. Only the first load clears the history, so
+ * autosaving a board no longer takes undo away from the person drawing it.
+ */
+function receive(elements: BoardElement[]): void {
+  if (!loaded) {
+    loaded = true;
+    canvas.setElements(elements);
+    history = [elements];
+    historyIndex = 0;
+    updateHistory();
     updateHint();
-  };
 
-  input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') commit();
-    if (event.key === 'Escape') close();
-  });
-  input.addEventListener('blur', commit);
+    return;
+  }
 
-  document.body.append(input);
-  input.focus();
+  if (same(elements, canvas.getElements())) return;
+
+  canvas.setElements(elements);
+  record(elements);
 }
 
 function record(elements: BoardElement[]): void {
+  if (same(elements, history[historyIndex] ?? [])) return;
   history = [...history.slice(0, historyIndex + 1), elements].slice(-HISTORY_LIMIT);
   historyIndex = history.length - 1;
   updateHistory();
   updateHint();
-}
-
-function resetHistory(elements: BoardElement[]): void {
-  history = [elements];
-  historyIndex = 0;
-  updateHistory();
 }
 
 function travel(step: number): void {
@@ -228,12 +420,13 @@ function persist(elements: BoardElement[]): void {
   post({ type: 'update', elements });
 }
 
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && (target.tagName === 'INPUT' || target.isContentEditable);
+function same(left: BoardElement[], right: BoardElement[]): boolean {
+  return left.length === right.length && JSON.stringify(left) === JSON.stringify(right);
 }
 
-function createId(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+function isTyping(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement
+    && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 }
 
 function post(message: BoardClientMessage): void {

@@ -156,6 +156,35 @@
   box-shadow: 0 0 0 1px var(--vscode-focusBorder);
 }
 
+.kind-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+.kind-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--vscode-input-border, var(--border));
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--vscode-input-background);
+  text-align: left;
+}
+
+.kind-option:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--vscode-foreground); }
+
+.kind-option.active {
+  border-color: var(--accent);
+  color: var(--vscode-foreground);
+  background: color-mix(in srgb, var(--accent) 14%, var(--vscode-input-background));
+}
+
+.kind-option .icon { width: 17px; height: 17px; flex: 0 0 auto; }
+.kind-option.active .icon { color: var(--accent); }
+.kind-copy { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.kind-name { font-size: 12px; font-weight: 600; line-height: 1.2; }
+.kind-hint { color: var(--muted); font-size: 10px; line-height: 1.25; }
+
 .form-error {
   min-height: 17px;
   padding-top: 4px;

@@ -51,10 +51,14 @@ export function activate(context: vscode.ExtensionContext): void {
         supportsMultipleEditorsPerDocument: true
       }
     ),
-    vscode.window.registerCustomEditorProvider(BoardEditorProvider.viewType, new BoardEditorProvider(context), {
-      webviewOptions: { retainContextWhenHidden: true },
-      supportsMultipleEditorsPerDocument: true
-    })
+    vscode.window.registerCustomEditorProvider(
+      BoardEditorProvider.viewType,
+      new BoardEditorProvider(context, attachments, storageRoot),
+      {
+        webviewOptions: { retainContextWhenHidden: true },
+        supportsMultipleEditorsPerDocument: true
+      }
+    )
   );
 
   registerCommand(context, 'devNotes.createNotebook', () => sidebar.showComposer('notebook'));

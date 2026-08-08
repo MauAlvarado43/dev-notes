@@ -1,5 +1,6 @@
 import type { NotebookSummary } from '@/core/types';
 import { button, element } from '@/presentation/webview/components/dom';
+import { icon, type IconName } from '@/presentation/webview/components/icons';
 import { t } from '@/presentation/webview/i18n/messages';
 
 export type ComposerKind =
@@ -137,20 +138,26 @@ export class Composer {
     );
   }
 
+  /** Two cards instead of a plain toggle, so the choice reads before it is made. */
   private renderKindToggle(active: 'createNote' | 'createBoard'): void {
     const group = element('div', 'kind-toggle');
-    group.setAttribute('role', 'tablist');
-    const options: Array<[ComposerKind, string]> = [
-      ['createNote', t('modal.kindNote')],
-      ['createBoard', t('modal.kindBoard')]
+    group.setAttribute('role', 'radiogroup');
+    group.setAttribute('aria-label', t('modal.kindLabel'));
+    const options: Array<[ComposerKind, IconName, string, string]> = [
+      ['createNote', 'note', t('modal.kindNote'), t('modal.kindNoteHint')],
+      ['createBoard', 'board', t('modal.kindBoard'), t('modal.kindBoardHint')]
     ];
 
-    for (const [kind, label] of options) {
-      const option = button({ className: `kind-option${kind === active ? ' active' : ''}`, text: label }, () => {
-        if (kind !== active) this.open(kind, this.target, this.notebooks);
+    for (const [kind, iconName, label, hint] of options) {
+      const selected = kind === active;
+      const option = button({ className: `kind-option${selected ? ' active' : ''}` }, () => {
+        if (!selected) this.open(kind, this.target, this.notebooks);
       });
-      option.setAttribute('role', 'tab');
-      option.setAttribute('aria-selected', String(kind === active));
+      const copy = element('span', 'kind-copy');
+      copy.append(element('span', 'kind-name', label), element('span', 'kind-hint', hint));
+      option.append(icon(iconName), copy);
+      option.setAttribute('role', 'radio');
+      option.setAttribute('aria-checked', String(selected));
       group.append(option);
     }
 

@@ -15,16 +15,38 @@ export type IconName =
   | 'image'
   | 'board'
   | 'cursor'
+  | 'lasso'
   | 'square'
+  | 'roundSquare'
   | 'circle'
+  | 'triangle'
+  | 'diamond'
+  | 'parallelogram'
+  | 'hexagon'
+  | 'cylinder'
+  | 'sticky'
+  | 'umlClass'
+  | 'package'
+  | 'actor'
+  | 'entity'
   | 'arrow'
   | 'line'
+  | 'elbow'
+  | 'connector'
   | 'text'
+  | 'fill'
+  | 'dash'
+  | 'copy'
+  | 'front'
+  | 'back'
   | 'undo'
   | 'redo'
   | 'zoomIn'
   | 'zoomOut'
-  | 'frame';
+  | 'fit'
+  | 'frame'
+  | 'keyboard'
+  | 'export';
 
 /**
  * Single SVG sprite injected once per webview. Icons are referenced by `<use>`,
@@ -47,15 +69,37 @@ const SPRITE = `<svg class="icon-sprite" aria-hidden="true">
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m4.5 17 4.5-4.5 3.5 3.5 3-2.5 4 4"/></symbol>
   <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v3M9 20h6"/><path d="M6.5 13.5c1.5-3.5 3-3.5 4 0 .8 2.5 2 1.5 2.5-1"/></symbol>
   <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5.5 3.5 19 11l-6 1.6L10.6 19z"/></symbol>
+  <symbol id="i-lasso" viewBox="0 0 24 24"><ellipse cx="12" cy="9.5" rx="8" ry="5.5"/><path d="M8.6 14.4c-.7 1.5-.3 2.9 1 3.4"/><circle cx="8.7" cy="19.4" r="1.6"/></symbol>
   <symbol id="i-square" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/></symbol>
+  <symbol id="i-roundSquare" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="5.5"/></symbol>
   <symbol id="i-circle" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8.5" ry="7"/></symbol>
+  <symbol id="i-triangle" viewBox="0 0 24 24"><path d="M12 5 20.5 19h-17z"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 4 20 12l-8 8-8-8z"/></symbol>
+  <symbol id="i-parallelogram" viewBox="0 0 24 24"><path d="M8.5 6H21l-5.5 12H3z"/></symbol>
+  <symbol id="i-hexagon" viewBox="0 0 24 24"><path d="M8 5h8l4 7-4 7H8l-4-7z"/></symbol>
+  <symbol id="i-cylinder" viewBox="0 0 24 24"><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><ellipse cx="12" cy="7" rx="8" ry="3"/></symbol>
+  <symbol id="i-sticky" viewBox="0 0 24 24"><path d="M5 4h14v10l-5 6H5z"/><path d="M19 14h-5v6"/></symbol>
+  <symbol id="i-umlClass" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.5h16M4 14.5h16"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M4 19V5h7v3h9v11z"/><path d="M4 8h7"/></symbol>
+  <symbol id="i-actor" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v7M7.5 11h9M12 15l-3.5 5M12 15l3.5 5"/></symbol>
+  <symbol id="i-entity" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10.5h18"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 20 20 4M20 4h-7M20 4v7"/></symbol>
   <symbol id="i-line" viewBox="0 0 24 24"><path d="M4 20 20 4"/></symbol>
+  <symbol id="i-elbow" viewBox="0 0 24 24"><path d="M4 6h6v12h10"/></symbol>
+  <symbol id="i-connector" viewBox="0 0 24 24"><rect x="3" y="3.5" width="7.5" height="5.5" rx="1.5"/><rect x="13.5" y="15" width="7.5" height="5.5" rx="1.5"/><path d="M6.8 9v5.2a2 2 0 0 0 2 2h4.7"/></symbol>
   <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></symbol>
+  <symbol id="i-fill" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M5 14.5 14.5 5M9 18.5 18.5 9M15 19l4-4"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+  <symbol id="i-front" viewBox="0 0 24 24"><rect x="3" y="10" width="11" height="10" rx="2"/><path d="M18.5 14.5V5M18.5 5 16 7.5M18.5 5 21 7.5"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><rect x="3" y="4" width="11" height="10" rx="2"/><path d="M18.5 9.5V19M18.5 19 16 16.5M18.5 19l2.5-2.5"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M4 9h11a5 5 0 0 1 0 10H8"/><path d="M4 9l4-4M4 9l4 4"/></symbol>
   <symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 9H9a5 5 0 0 0 0 10h7"/><path d="m20 9-4-4M20 9l-4 4"/></symbol>
   <symbol id="i-zoomIn" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4M8.5 11h5M11 8.5v5"/></symbol>
   <symbol id="i-zoomOut" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4M8.5 11h5"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V4M12 4 8.5 7.5M12 4l3.5 3.5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 9.5h.01M9.5 9.5h.01M13 9.5h.01M16.5 9.5h.01M6 12.5h.01M9.5 12.5h.01M13 12.5h.01M16.5 12.5h.01M8 15.5h8"/></symbol>
   <symbol id="i-frame" viewBox="0 0 24 24"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/></symbol>
 </svg>`;
 

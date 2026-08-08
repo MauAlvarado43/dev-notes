@@ -1,10 +1,41 @@
 import { LocalizedError } from '../core/i18n/catalog';
-import type { BoardDocument, BoardElement, BoardElementKind } from '../core/types';
+import type {
+  BoardAnchor,
+  BoardCap,
+  BoardDocument,
+  BoardElement,
+  BoardElementKind,
+  BoardEndpoint,
+  BoardRoute
+} from '../core/types';
 
 export const BOARD_EXTENSION = '.board.json';
 export const BOARD_VERSION = 1;
 
-const ELEMENT_KINDS: BoardElementKind[] = ['pen', 'rectangle', 'ellipse', 'arrow', 'line', 'text'];
+const ELEMENT_KINDS: BoardElementKind[] = [
+  'pen',
+  'line',
+  'arrow',
+  'connector',
+  'text',
+  'image',
+  'rectangle',
+  'roundRect',
+  'ellipse',
+  'triangle',
+  'diamond',
+  'parallelogram',
+  'hexagon',
+  'cylinder',
+  'note',
+  'umlClass',
+  'entity',
+  'package',
+  'actor'
+];
+const CAPS: BoardCap[] = ['none', 'arrow', 'triangle', 'diamond', 'filledDiamond', 'circle', 'one', 'many'];
+const ANCHORS: BoardAnchor[] = ['auto', 'top', 'right', 'bottom', 'left'];
+const ROUTES: BoardRoute[] = ['straight', 'elbow'];
 const MIN_STROKE = 1;
 const MAX_STROKE = 24;
 
@@ -83,12 +114,58 @@ function readElement(value: unknown): BoardElement | undefined {
     points
   };
   if (candidate.filled) element.filled = true;
+  if (candidate.dash) element.dash = true;
   if (kind === 'text') {
     if (typeof candidate.text !== 'string' || !candidate.text) return undefined;
     element.text = candidate.text;
+  } else if (typeof candidate.text === 'string' && candidate.text) {
+    element.text = candidate.text;
+  }
+
+  const rotation = normalizeRotation(candidate.rotation);
+  if (rotation !== 0) element.rotation = rotation;
+
+  // An image without a file is nothing to draw, so it does not survive the read.
+  if (kind === 'image') {
+    if (typeof candidate.src !== 'string' || !candidate.src) return undefined;
+    element.src = candidate.src;
+  }
+
+  if (kind === 'connector') {
+    const from = readEndpoint(candidate.from);
+    const to = readEndpoint(candidate.to);
+    if (from) element.from = from;
+    if (to) element.to = to;
+    element.startCap = readCap(candidate.startCap, 'none');
+    element.endCap = readCap(candidate.endCap, 'arrow');
+    element.route = ROUTES.includes(candidate.route as BoardRoute) ? (candidate.route as BoardRoute) : 'straight';
   }
 
   return element;
+}
+
+/** An endpoint without an element is a free end, which `points` already covers. */
+function readEndpoint(value: unknown): BoardEndpoint | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const candidate = value as BoardEndpoint;
+  if (typeof candidate.element !== 'string' || !candidate.element) return undefined;
+
+  return {
+    element: candidate.element,
+    anchor: ANCHORS.includes(candidate.anchor as BoardAnchor) ? candidate.anchor : 'auto'
+  };
+}
+
+function readCap(value: unknown, fallback: BoardCap): BoardCap {
+  return CAPS.includes(value as BoardCap) ? (value as BoardCap) : fallback;
+}
+
+/** Rotation is stored as a positive angle below a full turn, so files stay tidy. */
+function normalizeRotation(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  const turns = ((value % 360) + 360) % 360;
+
+  return Math.round(turns * 100) / 100;
 }
 
 function clampStroke(width: unknown): number {
