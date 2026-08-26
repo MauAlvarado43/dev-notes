@@ -1,14 +1,14 @@
-# Crear extensión VS Code de notas
+# Build a VS Code notes extension
 
-> Necesito una extensión de vscode para hacer notas. Simplemente que sea como un notepad con soporte para markdown para poder guardar a lo mejor comandos, keys, etc
-> Poder hacer como varios notebooks y ahí poder guardar cosas
-> Hazla en C:\Users\raide\Projects\Personal\DevNotes
+> I need a VS Code extension for taking notes. It should be like a notepad with Markdown support so I can save commands, keys, and similar information.
+> I want multiple notebooks where I can organize things.
+> Build it in C:\Users\raide\Projects\Personal\DevNotes
 
 <details><summary>6 previous messages</summary>
 
-> Voy a construir una extensión funcional en esa carpeta: varios notebooks, notas Markdown con vista previa, búsqueda básica y almacenamiento local dentro de VS Code. Primero revisaré lo que ya existe para no pisar archivos tuyos, y después la probaré compilando y ejecutando sus tests esenciales.
+> I will build a functional extension in that directory with multiple notebooks, Markdown notes with preview, basic search, and local storage in VS Code. I will first inspect what already exists so I do not overwrite your files, then compile it and run its essential tests.
 >
-> La carpeta está vacía, así que puedo partir de una base limpia. Voy a usar el editor Markdown nativo de VS Code para que las notas se sientan como archivos normales, y añadiré una barra lateral propia para organizar notebooks, crear/renombrar/eliminar notas, buscar contenido y abrir la vista previa. Los datos quedarán fuera del proyecto abierto, en el almacenamiento privado de la extensión, salvo que configures otra carpeta.
+> The directory is empty, so I can start from a clean base. I will use the native VS Code Markdown editor so notes behave like regular files, and add a dedicated sidebar for organizing notebooks, creating, renaming, and deleting notes, searching content, and opening previews. Data will remain outside the open project in private extension storage unless you configure another directory.
 >
 > <details><summary>Created 12 files, edited 2 files</summary>
 >
@@ -29,7 +29,7 @@
 >
 > </details>
 >
-> La primera versión ya está montada. Incluí dos detalles importantes para que sea cómoda de verdad: las notas son archivos Markdown reales (guardado automático, undo, syntax highlighting y preview nativos) y la búsqueda revisa título, notebook y contenido. Ahora estoy cerrando los bordes de uso —primer notebook, nombres duplicados, renombrados con editores abiertos— y preparando un `.vsix` instalable.
+> The first version is in place. Two details make it practical: notes are real Markdown files with native autosave, undo, syntax highlighting, and preview, while search checks title, notebook, and content. I am finishing edge cases around the first notebook, duplicate names, and renames with open editors, then preparing an installable `.vsix`.
 >
 > <details><summary>Edited 3 files, deleted a file</summary>
 >
@@ -40,35 +40,35 @@
 >
 > </details>
 >
-> La extensión ya compila y el paquete instalable se genera correctamente; además, la auditoría de dependencias quedó en cero vulnerabilidades. Estoy haciendo la última verificación del contenido del VSIX y dejando una copia lista para instalar, sin instalarla automáticamente en tu VS Code para no alterar tu entorno sin pedirlo.
+> The extension compiles and packages correctly, and the dependency audit reports zero vulnerabilities. I am making a final inspection of the VSIX contents and leaving an installable copy without changing your VS Code environment automatically.
 </details>
 
-La extensión **Dev Notes** está terminada en:
+The **Dev Notes** extension is complete at:
 
 `C:\Users\raide\Projects\Personal\DevNotes`
 
-Incluye:
+It includes:
 
-- Varios notebooks con notas Markdown.
-- Crear, renombrar y eliminar notas/notebooks.
-- Vista previa Markdown.
-- Búsqueda por título, notebook y contenido.
-- Atajos `Ctrl+Alt+N` y `Ctrl+Alt+F`.
-- Almacenamiento configurable.
-- Manejo seguro de nombres duplicados e inválidos.
+- Multiple notebooks with Markdown notes.
+- Create, rename, and delete notes and notebooks.
+- Markdown preview.
+- Search by title, notebook, and content.
+- `Ctrl+Alt+N` and `Ctrl+Alt+F` shortcuts.
+- Configurable storage.
+- Safe handling of duplicate and invalid names.
 
-Puedes instalarla desde **Extensiones → ⋯ → Instalar desde VSIX**:
+Install it from **Extensions → ⋯ → Install from VSIX**:
 
-[Descargar Dev Notes 0.1.0](./outputs/dev-notes-0.1.0.vsix)
+[Download Dev Notes 0.1.0](./outputs/dev-notes-0.1.0.vsix)
 
-También puedes pulsar `F5` dentro del proyecto para probarla en modo desarrollo. La compilación, empaquetado y auditoría de dependencias finalizaron correctamente, con cero vulnerabilidades.
+You can also press `F5` in the project to test it in development mode. Build, packaging, and the dependency audit completed successfully with zero vulnerabilities.
 
-> Casi, pero mejora el UI/UX
-> Quiero que el markdown sea renderizado por la extensión. Igual la posibilidad de editarlo. No quiero depender del UX incómodo de editar un md en vscode que tienes que pulsar otro botón para ver la lectura bonita del md
+> Almost, but improve the UI and UX.
+> I want Markdown rendered by the extension with an editing option. I do not want to depend on the awkward VS Code flow where I must press another button to see a readable Markdown view.
 
 <details><summary>5 previous messages</summary>
 
-> Entiendo el problema: la nota debe abrirse ya “bonita”, como una página de lectura, y la edición tiene que estar integrada en esa misma superficie. Voy a sustituir la apertura en el editor Markdown normal por un editor propio con dos modos: **Lectura** y **Editar**, vista previa en vivo, guardado automático, estado de guardado y botones para copiar bloques de código.
+> I understand the problem: a note should open in a polished reading view, with editing integrated into the same surface. I will replace the regular Markdown editor with a custom editor containing **Read** and **Edit** modes, live preview, autosave, save status, and buttons for copying code blocks.
 >
 > <details><summary>Created a file, edited 4 files</summary>
 >
@@ -80,7 +80,7 @@ También puedes pulsar `F5` dentro del proyecto para probarla en modo desarrollo
 >
 > </details>
 >
-> El nuevo flujo ya está implementado: al abrir una nota entra directamente en modo lectura, y **Editar** cambia a un panel Markdown + resultado en vivo sin abrir pestañas adicionales. La vista también conserva el modo elegido, responde a `Ctrl+S` y `Ctrl+E`, y trata los enlaces externos de forma segura. Ahora estoy validando la sincronización entre escritura, render y guardado para evitar pérdidas al teclear rápido.
+> The new flow is implemented: a note opens directly in reading mode, and **Edit** switches to a Markdown panel plus live output without opening another tab. The view preserves the selected mode, handles `Ctrl+S` and `Ctrl+E`, and treats external links safely. I am validating synchronization among typing, rendering, and saving to prevent data loss during fast input.
 >
 > <details><summary>Edited a file</summary>
 >
@@ -90,33 +90,33 @@ También puedes pulsar `F5` dentro del proyecto para probarla en modo desarrollo
 >
 > </details>
 >
-> La verificación pasó: el editor web compila, el script interno es sintácticamente válido, el renderizador escapa HTML peligroso y bloquea enlaces con protocolos no permitidos. También confirmé que el VSIX contiene el editor empaquetado completo; solo falta dejarte la versión 0.2.0 lista para instalar.
+> Verification passed: the web editor compiles, its internal script is syntactically valid, the renderer escapes dangerous HTML, and unsupported link protocols are blocked. I also confirmed that the VSIX contains the complete packaged editor. The remaining step is to leave version 0.2.0 ready to install.
 </details>
 
-He actualizado **Dev Notes a la versión 0.2.0**.
+I updated **Dev Notes to version 0.2.0**.
 
-Ahora cada nota se abre directamente renderizada por la extensión, sin depender del editor o preview Markdown de VS Code.
+Every note now opens rendered directly by the extension without depending on the VS Code Markdown editor or preview.
 
-Incluye:
+It includes:
 
-- Modo **Lectura** como vista predeterminada.
-- Modo **Editar** con Markdown y preview en vivo.
-- Guardado automático.
-- Estado de guardado y contador de palabras.
-- `Ctrl+E` para alternar lectura/edición.
-- `Ctrl+S` para guardar.
-- Botones para copiar bloques de código.
-- Apertura segura de enlaces externos.
-- Interfaz adaptable al tema de VS Code.
+- **Read** mode as the default view.
+- **Edit** mode with Markdown and live preview.
+- Autosave.
+- Save status and word count.
+- `Ctrl+E` to switch between reading and editing.
+- `Ctrl+S` to save.
+- Buttons to copy code blocks.
+- Safe opening of external links.
+- An interface that adapts to the VS Code theme.
 
-El código actualizado está en `C:\Users\raide\Projects\Personal\DevNotes`.
+The updated code is in `C:\Users\raide\Projects\Personal\DevNotes`.
 
-[Instalar Dev Notes 0.2.0](./outputs/dev-notes-0.2.0.vsix)
+[Install Dev Notes 0.2.0](./outputs/dev-notes-0.2.0.vsix)
 
-Puedes instalar el VSIX encima de la versión anterior; VS Code la actualizará automáticamente.
+You can install the VSIX over the previous version; VS Code will update it automatically.
 
-> Me gustaría a lo mejor, no depender de estos como forms de vscode
-> Si no que fueran dentro de la extensión
+> I would prefer not to depend on these VS Code forms.
+> I want them inside the extension instead.
 >
 > User context
 >
@@ -125,9 +125,9 @@ Puedes instalar el VSIX encima de la versión anterior; VS Code la actualizará 
 
 <details><summary>6 previous messages</summary>
 
-> Sí, esa caja superior rompe por completo la sensación de aplicación propia. Voy a mover la creación y el renombrado a la interfaz de Dev Notes: formularios/modales dentro de la barra lateral, con validación ahí mismo, sin `showInputBox` ni selectores rápidos de VS Code para el flujo normal. También integraré la elección de notebook al crear una nota.
+> Yes, the top input box breaks the feeling of a self-contained application. I will move creation and renaming into the Dev Notes interface with forms and modals in the sidebar, inline validation, and no `showInputBox` or Quick Pick in the normal flow. Notebook selection will also be part of note creation.
 >
-> La captura confirma exactamente el punto: el formulario está fuera del contexto visual de la extensión. Voy a convertir la barra lateral en una vista web propia, no solo un árbol nativo. Ahí vivirán la lista de notebooks, búsqueda, creación, selección de notebook, renombrado y confirmaciones de borrado; las cajas superiores de VS Code dejarán de usarse.
+> The screenshot confirms the issue: the form sits outside the extension context. I will turn the sidebar into its own webview instead of a native tree. The notebook list, search, creation, notebook selection, rename, and delete confirmations will all live there, and the top VS Code input boxes will no longer be used.
 >
 > <details><summary>Created 2 files, edited 4 files</summary>
 >
@@ -140,7 +140,7 @@ Puedes instalar el VSIX encima de la versión anterior; VS Code la actualizará 
 >
 > </details>
 >
-> La barra lateral propia ya reemplazó el árbol nativo: ahora tiene buscador, notebooks desplegables, previews breves de cada nota y acciones integradas. Los botones superiores siguen funcionando, pero abren el modal dentro de Dev Notes. Estoy afinando estados poco visibles —abrir muy rápido, errores con datos desactualizados y barras laterales estrechas— antes de empaquetarla.
+> The custom sidebar now replaces the native tree. It includes search, collapsible notebooks, short note previews, and integrated actions. Header buttons still work but open the modal inside Dev Notes. I am polishing less visible states such as rapid opening, stale-data errors, and narrow sidebars before packaging.
 >
 > <details><summary>Edited 2 files</summary>
 >
@@ -149,30 +149,30 @@ Puedes instalar el VSIX encima de la versión anterior; VS Code la actualizará 
 >
 > </details>
 >
-> La versión 0.3.0 ya está empaquetada con la vista lateral declarada como webview propia —no como árbol/formulario nativo— y mantiene el editor Markdown integrado de la versión anterior. La comprobación final confirma también que solo quedan dos iconos discretos en el encabezado de VS Code; creación, búsqueda, selección, renombrado y borrado viven dentro del panel.
+> Version 0.3.0 is packaged with the sidebar declared as a custom webview rather than a native tree or form, while retaining the integrated Markdown editor. The final check also confirms that only two discreet icons remain in the VS Code header; creation, search, selection, rename, and deletion all live in the panel.
 </details>
 
-He actualizado **Dev Notes a la versión 0.3.0**.
+I updated **Dev Notes to version 0.3.0**.
 
-La barra lateral ahora es una interfaz propia de la extensión:
+The sidebar is now a self-contained extension interface:
 
-- Formularios internos para crear y renombrar.
-- Selector de notebook integrado.
-- Confirmaciones de eliminación dentro del panel.
-- Búsqueda instantánea.
-- Notebooks desplegables.
-- Fragmentos del contenido de cada nota.
-- Acciones disponibles al pasar sobre notebooks y notas.
-- Sin `showInputBox`, `QuickPick` ni formularios superiores de VS Code en estos flujos.
+- Internal forms for creation and renaming.
+- Integrated notebook selector.
+- Delete confirmations inside the panel.
+- Instant search.
+- Collapsible notebooks.
+- Content excerpts for each note.
+- Actions shown when hovering over notebooks and notes.
+- No `showInputBox`, Quick Pick, or top-level VS Code forms in these flows.
 
-Se mantiene el editor Markdown integrado con lectura, edición y preview en vivo.
+The integrated Markdown editor with reading, editing, and live preview remains available.
 
-[Instalar Dev Notes 0.3.0](./outputs/dev-notes-0.3.0.vsix)
+[Install Dev Notes 0.3.0](./outputs/dev-notes-0.3.0.vsix)
 
-El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\DevNotes`.
+The updated source code remains in `C:\Users\raide\Projects\Personal\DevNotes`.
 
-> Mejora el UI/UX, está raro
-> Básate en las otras extensiones que hay en la carpeta de Personal/
+> Improve the UI and UX; it feels strange.
+> Use the other extensions in the `Personal/` directory as references.
 >
 > User context
 >
@@ -181,9 +181,9 @@ El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\Dev
 
 <details><summary>8 previous messages</summary>
 
-> Sí, se ve “web incrustada”: demasiado padding, botón turquesa dominante, bordes redondeados que no siguen el lenguaje de VS Code y un estado vacío poco natural. Voy a revisar las otras extensiones de `Personal` para reutilizar sus patrones reales de navegación, densidad, iconos y estados vacíos, y después ajustar Dev Notes para que parezca una extensión nativa y coherente con ese conjunto.
+> Yes, it feels like an embedded website: too much padding, a dominant turquoise button, rounded borders that do not follow the VS Code visual language, and an unnatural empty state. I will inspect the other `Personal` extensions and reuse their navigation, density, icon, and empty-state patterns so Dev Notes feels native and consistent with the set.
 >
-> Encontré el patrón común de `DevFolder`, `DevCommands` y `DevTracker`: acento violeta consistente, cabecera de producto, búsqueda + acción compacta, grupos en tarjetas densas, iconos SVG uniformes, menú de tres puntos y modales centrados. Voy a aplicar ese mismo sistema visual a Dev Notes, en vez de inventar otro estilo aislado.
+> I found the shared pattern in `DevFolder`, `DevCommands`, and `DevTracker`: a consistent violet accent, product header, search with a compact action, dense card groups, uniform SVG icons, three-dot menus, and centered modals. I will apply that system to Dev Notes instead of inventing another isolated style.
 >
 > <details><summary>Edited 2 files</summary>
 >
@@ -200,7 +200,7 @@ El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\Dev
 >
 > </details>
 >
-> Ya ajusté ambos espacios —barra lateral y lector/editor— al mismo lenguaje violeta de las otras extensiones. Para no dar por bueno el CSS solo porque compila, voy a usar el flujo de control visual de Windows para abrir una instancia de desarrollo aislada de VS Code y comprobar la composición real en una barra lateral estrecha.
+> I aligned both surfaces, the sidebar and reader/editor, with the violet visual language of the other extensions. To validate more than compilation, I will use the Windows visual-control workflow to open an isolated VS Code development instance and inspect the actual composition in a narrow sidebar.
 >
 > <details><summary>Called 2 tools</summary>
 >
@@ -574,7 +574,7 @@ El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\Dev
 >
 > ```json
 > {
->   "title": "Consultar API de ventanas",
+>   "title": "Inspect window API",
 >   "code": "var apiDocs = await sky.documentation(\"api\"); nodeRepl.write(apiDocs);"
 > }
 > ```
@@ -729,7 +729,7 @@ El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\Dev
 >
 > </details>
 >
-> La revisión contra los proyectos vecinos ya está reflejada: Dev Notes usa ahora el mismo acento violeta, cabecera de marca, acción compacta junto al buscador, notebooks como tarjetas con color propio, menú de tres puntos, SVGs consistentes, estado vacío ilustrado y modales centrados. También eliminé los caracteres `✎`, `×` y el botón turquesa ancho que hacían que se sintiera improvisado.
+> The review against neighboring projects is now reflected in Dev Notes: it uses the same violet accent, branded header, compact action beside search, notebooks as color-accented cards, a three-dot menu, consistent SVGs, an illustrated empty state, and centered modals. I also removed the `✎` and `×` characters and the wide turquoise button that made the interface feel improvised.
 >
 > <details><summary>Edited 3 files</summary>
 >
@@ -739,24 +739,24 @@ El código fuente actualizado permanece en `C:\Users\raide\Projects\Personal\Dev
 >
 > </details>
 >
-> La versión final ya pasó compilación, validación del JavaScript de ambos webviews, revisión del manifiesto y auditoría de dependencias. El paquete conserva la vista lateral como webview propia y ya no contiene llamadas a los formularios nativos de VS Code en los flujos de notas.
+> The final version passed compilation, JavaScript validation for both webviews, manifest inspection, and dependency audit. The package retains its custom webview sidebar and contains no calls to native VS Code forms in note-management flows.
 </details>
 
-He actualizado **Dev Notes a la versión 0.4.0**, tomando como referencia directa los patrones visuales de `DevFolder`, `DevCommands` y `DevTracker`.
+I updated **Dev Notes to version 0.4.0**, using the visual patterns of `DevFolder`, `DevCommands`, and `DevTracker` as direct references.
 
-Cambios principales:
+Main changes:
 
-- Identidad violeta consistente con las otras extensiones.
-- Cabecera propia de Dev Notes.
-- Buscador y botón de creación compactos.
-- Notebooks presentados como tarjetas con acentos de color.
-- Menús de tres puntos en lugar de símbolos sueltos.
-- Iconos SVG consistentes.
-- Estado vacío ilustrado y mejor distribuido.
-- Modales centrados con mejor jerarquía y animaciones.
-- Lector/editor Markdown adaptado a la misma identidad visual.
-- Sin formularios nativos de VS Code para gestionar notas.
+- A violet identity consistent with the other extensions.
+- A dedicated Dev Notes header.
+- Compact search and creation controls.
+- Notebooks displayed as color-accented cards.
+- Three-dot menus instead of standalone symbols.
+- Consistent SVG icons.
+- A better distributed illustrated empty state.
+- Centered modals with clearer hierarchy and animation.
+- A Markdown reader/editor adapted to the same visual identity.
+- No native VS Code forms for note management.
 
-[Instalar Dev Notes 0.4.0](./outputs/dev-notes-0.4.0.vsix)
+[Install Dev Notes 0.4.0](./outputs/dev-notes-0.4.0.vsix)
 
-Compilación y empaquetado correctos, con cero vulnerabilidades.
+Build and packaging completed successfully with zero vulnerabilities.

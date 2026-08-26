@@ -6,6 +6,10 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+### Changed
+
+- Rewrote the backup and recovery guide and the historical development record in English.
+
 ## [0.8.0] - 2026-08-26
 
 ### Added
