@@ -1,6 +1,8 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import * as fs from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { defaultLocale, isAppLocale } from '../core/i18n/catalog';
 import type { AppLocale } from '../core/types';
 
@@ -36,18 +38,33 @@ export function reopenNotesEnabled(): boolean {
 }
 
 /**
- * Folder holding every notebook. An empty setting keeps notes inside the private
- * extension storage; a configured path may start with `~` for the home folder.
+ * Notebook location in the active private generation. Legacy storagePath is
+ * handled once by migrateNotebookStorage, never used as the live data directory.
  */
-export function resolveStorageRoot(context: vscode.ExtensionContext): vscode.Uri {
+export function resolveStorageRoot(context: vscode.ExtensionContext, root = context.globalStorageUri): vscode.Uri {
+  return vscode.Uri.joinPath(root, 'notebooks');
+}
+
+/** Copy legacy custom storage once, leaving its source untouched. Never merge silently. */
+export async function migrateNotebookStorage(root: vscode.Uri): Promise<void> {
+  const marker = path.join(root.fsPath, 'notes-migration.json');
+  try { await fs.access(marker); return; } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   const configured = configuration().get<string>('storagePath', '').trim();
-  if (!configured) return vscode.Uri.joinPath(context.globalStorageUri, 'notebooks');
-
-  const expanded = configured === '~'
-    ? os.homedir()
-    : configured.startsWith(`~${path.sep}`) || configured.startsWith('~/')
-      ? path.join(os.homedir(), configured.slice(2))
-      : configured;
-
-  return vscode.Uri.file(path.resolve(expanded));
+  const target = path.join(root.fsPath, 'notebooks');
+  if (configured) {
+    const expanded = configured === '~' ? os.homedir() : configured.startsWith('~/') || configured.startsWith('~\\') ? path.join(os.homedir(), configured.slice(2)) : configured;
+    const source = path.resolve(expanded);
+    if (source !== target) {
+      let contents: string[] = [];
+      try { contents = await fs.readdir(target); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+      if (contents.length) throw new Error('Both private and custom notebooks exist. Back up both and clear devNotes.storagePath to use private notes; no files were overwritten.');
+      const staging = path.join(root.fsPath, 'notebooks-migration-' + randomUUID());
+      try {
+        await fs.cp(source, staging, { recursive: true, errorOnExist: true, force: false });
+        await fs.rename(staging, target);
+      } finally { await fs.rm(staging, { recursive: true, force: true }); }
+    }
+  }
+  await fs.mkdir(target, { recursive: true, mode: 0o700 });
+  await fs.writeFile(marker, JSON.stringify({ complete: true }), { mode: 0o600 });
 }

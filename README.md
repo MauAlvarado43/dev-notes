@@ -2,11 +2,11 @@
 
 Dev Notes is a local-first VS Code extension that keeps commands, snippets, and development notes as real Markdown files, organized in notebooks, with its own reading and editing surface.
 
-Notes never leave the machine. By default they live in the private VS Code storage for the extension, and the folder can be moved to a synced or backed-up location.
+Notes live in private extension storage. Optional Google Drive backups send snapshots only after you connect your account; legacy custom folders migrate without deleting their source.
 
 ## Project status
 
-The current version is `0.7.0`. Planned changes are tracked in `CHANGELOG.md`.
+The current version is `0.8.0`. Planned changes are tracked in `CHANGELOG.md`.
 
 - Architecture: `docs/ARCHITECTURE.md`
 - Release process: `RELEASE.md`
@@ -22,7 +22,7 @@ The current version is `0.7.0`. Planned changes are tracked in `CHANGELOG.md`.
 - File attachments copied into the notes folder, listed on the note, and insertable as Markdown references.
 - Copy buttons on code blocks and guarded opening of external links.
 - English and Spanish interface, selected with `devNotes.language`.
-- A configurable storage folder, so notes can live wherever they should be backed up.
+- Private storage with manual and automatic backups, optional Google Drive upload, and portable recovery.
 
 ## Boards
 
@@ -66,7 +66,7 @@ Because attachments are stored inside the notes folder, they travel with a backu
 | Setting | Default | Description |
 | --- | --- | --- |
 | `devNotes.language` | `en` | Interface language: English or Spanish. |
-| `devNotes.storagePath` | *(empty)* | Folder holding the notebooks. Empty uses private extension storage; a leading `~` is expanded. |
+| `devNotes.storagePath` | *(empty)* | Deprecated migration source. Notebooks now live in private extension storage. |
 | `devNotes.noteTemplate` | `# ${title}\n\n` | Initial content of a new note. |
 | `devNotes.autoSave` | `true` | Save automatically after editing in the Dev Notes editor. |
 | `devNotes.reopenNotesInEditor` | `true` | Reopen a note in the Dev Notes editor when VS Code shows it in the plain text editor. |
@@ -105,3 +105,7 @@ src/
 ## License
 
 Dev Notes is licensed under the `MIT License` in `LICENSE`.
+
+## Private storage and Google Drive backups
+
+The `local` environment supports manual snapshots, optional automatic backups, Google Drive authorization, and restoration on another computer. Backups have no additional encryption by default; passphrase encryption is optional. No account is connected or automatic upload enabled by installation alone. See [backup setup and recovery](docs/BACKUPS.md), including exclusions and limits. Supabase is not implemented yet.

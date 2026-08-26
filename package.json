@@ -2,7 +2,7 @@
   "name": "dev-notes",
   "displayName": "Dev Notes",
   "description": "%extension.description%",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publisher": "raide",
   "license": "MIT",
   "repository": {
@@ -24,6 +24,7 @@
     "Snippets"
   ],
   "main": "./dist/extension.js",
+  "activationEvents": ["onStartupFinished"],
   "contributes": {
     "customEditors": [
       {
@@ -48,6 +49,12 @@
       }
     ],
     "commands": [
+      {"command": "devNotes.connectDrive", "title": "%command.connectDrive.title%", "category": "Dev Notes"},
+      {"command": "devNotes.disconnectDrive", "title": "%command.disconnectDrive.title%", "category": "Dev Notes"},
+      {"command": "devNotes.backupNow", "title": "%command.backupNow.title%", "category": "Dev Notes"},
+      {"command": "devNotes.restoreBackup", "title": "%command.restoreBackup.title%", "category": "Dev Notes"},
+      {"command": "devNotes.setBackupPassphrase", "title": "%command.setBackupPassphrase.title%", "category": "Dev Notes"},
+      {"command": "devNotes.backupStatus", "title": "%command.backupStatus.title%", "category": "Dev Notes"},
       {
         "command": "devNotes.createNotebook",
         "title": "%command.createNotebook.title%",
@@ -132,6 +139,35 @@
     "configuration": {
       "title": "%configuration.title%",
       "properties": {
+        "devNotes.environment": {
+          "type": "string",
+          "enum": [
+            "local"
+          ],
+          "default": "local",
+          "scope": "application",
+          "description": "%configuration.environment.description%"
+        },
+        "devNotes.backup.autoEnabled": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "%configuration.backup.autoEnabled.description%"
+        },
+        "devNotes.backup.intervalMinutes": {
+          "type": "integer",
+          "default": 30,
+          "minimum": 5,
+          "maximum": 1440,
+          "scope": "machine",
+          "description": "%configuration.backup.intervalMinutes.description%"
+        },
+        "devNotes.backup.encrypt": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "%configuration.backup.encrypt.description%"
+        },
         "devNotes.language": {
           "type": "string",
           "default": "en",
@@ -144,7 +180,8 @@
           "type": "string",
           "default": "",
           "scope": "window",
-          "description": "%configuration.storagePath.description%"
+          "description": "%configuration.storagePath.description%",
+          "deprecationMessage": "%configuration.storagePath.deprecated%"
         },
         "devNotes.noteTemplate": {
           "type": "string",

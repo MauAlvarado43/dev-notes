@@ -1,3 +1,5 @@
+import { BackupController, initializeLocal } from './infrastructure/backup/host';
+import { fileAdapter } from './infrastructure/backup/files-adapter';
 import * as vscode from 'vscode';
 import { localizeError, translate } from './core/i18n/catalog';
 import { isBoardFile } from './domain/boards';
@@ -9,7 +11,8 @@ import {
   CONFIGURATION_SECTION,
   reopenNotesEnabled,
   resolveLocale,
-  resolveStorageRoot
+  resolveStorageRoot,
+  migrateNotebookStorage
 } from './infrastructure/settings';
 import { BoardEditorProvider } from './presentation/host/board-editor';
 import { NoteEditorProvider } from './presentation/host/note-editor';
@@ -18,8 +21,10 @@ import { SidebarProvider } from './presentation/host/sidebar-view';
 /** How long a note is skipped by the watcher after it was reopened. */
 const REOPEN_GUARD_MS = 1500;
 
-export function activate(context: vscode.ExtensionContext): void {
-  const storageRoot = (): vscode.Uri => resolveStorageRoot(context);
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  const data = await initializeLocal(context, 'devNotes');
+  await migrateNotebookStorage(data.root);
+  const storageRoot = (): vscode.Uri => resolveStorageRoot(context, data.root);
   const attachments = new AttachmentStore();
   const store = new NotebookStore(storageRoot, attachments);
   const openNote = async (uri: vscode.Uri, viewColumn?: vscode.ViewColumn): Promise<void> => {
@@ -40,6 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const sidebar = new SidebarProvider(context.extensionUri, store, openEntry);
 
   context.subscriptions.push(
+    new BackupController(context, 'devNotes', data.root, fileAdapter(data.root.fsPath, 'notes')),
     vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebar, {
       webviewOptions: { retainContextWhenHidden: true }
     }),

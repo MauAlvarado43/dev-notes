@@ -100,3 +100,7 @@ Stylesheets live in `src/presentation/webview/styles` and are imported by the bu
 - The host renders Markdown with raw HTML disabled; webviews must not relax that.
 - Only well-known link schemes are opened, and the Content Security Policy of each webview allows a single nonced script.
 - Names coming from a webview are validated again in the host before they become a URI.
+
+## Backup boundary
+
+`initializeLocal` resolves the private active data generation. `BackupController` owns local snapshots, optional passphrase encryption, OAuth/Drive transport, scheduled retries and restore commands. Extension-specific adapters capture only owned data. Restore stages a new generation and switches `active-data.json`, retaining the original files. JSON/SQLite writers in the old generation reject writes until reload; other windows and MCP clients must be restarted. The backup core is vendored so each extension remains independently buildable. See [BACKUPS.md](BACKUPS.md).

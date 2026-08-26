@@ -14,5 +14,16 @@
   "configuration.storagePath.description": "Folder where notebooks are stored. Empty uses the private VS Code storage. A leading ~ is supported.",
   "configuration.noteTemplate.description": "Initial content of a note. Use ${title} to insert its name.",
   "configuration.autoSave.description": "Save notes automatically after editing them in the Dev Notes editor.",
-  "configuration.reopenNotesInEditor.description": "Reopen a note in the Dev Notes editor when VS Code shows it in the plain text editor."
+  "configuration.reopenNotesInEditor.description": "Reopen a note in the Dev Notes editor when VS Code shows it in the plain text editor.",
+  "command.connectDrive.title": "Connect Google Drive",
+  "command.disconnectDrive.title": "Disconnect Google Drive",
+  "command.backupNow.title": "Create backup now",
+  "command.restoreBackup.title": "Restore backup",
+  "command.setBackupPassphrase.title": "Set backup passphrase (optional)",
+  "command.backupStatus.title": "Show backup status",
+  "configuration.environment.description": "Data environment. Only local private extension storage is available; Supabase is not implemented.",
+  "configuration.backup.autoEnabled.description": "Create snapshots while VS Code is open; upload them when Drive is connected. Disabled by default. Unencrypted backups may contain readable secrets.",
+  "configuration.backup.intervalMinutes.description": "Minutes between automatic backups when data changes. Failed uploads are retried without replacing old snapshots.",
+  "configuration.backup.encrypt.description": "Optional passphrase encryption. Off by default: recovery only needs the backup file. If enabled, keep the passphrase outside this PC.",
+  "configuration.storagePath.deprecated": "Migrated once into private extension storage. Change this setting only to recover an old installation before migration."
 }

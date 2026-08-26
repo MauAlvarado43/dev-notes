@@ -6,6 +6,30 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-26
+
+### Added
+
+- Manual and opt-in automatic backups, Google Drive Desktop OAuth, backup status, and restore commands.
+- A private `local` data environment with portable snapshots of Markdown notebooks, boards, hidden attachments, empty notebooks, and preferences.
+
+### Changed
+
+- Custom `devNotes.storagePath` is deprecated and used only for migration into private extension storage. The original directory is preserved; conflicting nonempty destinations are not silently merged.
+- The extension activates after startup so scheduled backups do not depend on opening the notes sidebar.
+
+### Backup and recovery
+
+- Backups have no additional encryption by default and can be restored on another computer without the original machine's credentials. Recovery-passphrase encryption is optional; keep the passphrase outside the computer if enabled.
+- Local snapshots are retained when Drive is unavailable and pending uploads are retried. Device-specific, uniquely named snapshots do not overwrite other computers' backups or synchronize live data.
+- Restore validates the extension, schema, paths, and checksums, then switches to a new data generation while retaining the original files.
+- OAuth credentials and tokens are kept in VS Code SecretStorage and excluded from backups. Drive setup, recovery, limits, and exclusions are documented in `docs/BACKUPS.md`; Supabase remains deferred.
+
+### Validation
+
+- `npm run check`: 53 tests, TypeScript validation, and production bundles on Linux.
+- Backup tests cover portable restore, optional encryption, damaged archives, attachments, concurrent writers, mocked OAuth/Drive requests, and offline upload retries. Live Google account authorization remains a manual setup check.
+
 ## [0.7.0] - 2026-08-08
 
 ### Added
