@@ -2,7 +2,7 @@
   "name": "dev-notes",
   "displayName": "Dev Notes",
   "description": "%extension.description%",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "raide",
   "license": "MIT",
   "repository": {
@@ -55,6 +55,7 @@
       {"command": "devNotes.restoreBackup", "title": "%command.restoreBackup.title%", "category": "Dev Notes"},
       {"command": "devNotes.setBackupPassphrase", "title": "%command.setBackupPassphrase.title%", "category": "Dev Notes"},
       {"command": "devNotes.backupStatus", "title": "%command.backupStatus.title%", "category": "Dev Notes"},
+      {"command": "devNotes.openBackupSettings", "title": "%command.openBackupSettings.title%", "category": "Dev Notes", "icon": "$(cloud)"},
       {
         "command": "devNotes.createNotebook",
         "title": "%command.createNotebook.title%",
@@ -121,7 +122,8 @@
           "command": "devNotes.refresh",
           "when": "view == devNotes.notebooks",
           "group": "navigation@2"
-        }
+        },
+        { "command": "devNotes.openBackupSettings", "when": "view == devNotes.notebooks", "group": "navigation@99" }
       ]
     },
     "keybindings": [

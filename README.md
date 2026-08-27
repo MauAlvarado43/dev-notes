@@ -6,7 +6,7 @@ Notes live in private extension storage. Optional Google Drive backups send snap
 
 ## Project status
 
-The current version is `0.8.0`. Planned changes are tracked in `CHANGELOG.md`.
+The current version is `0.9.0`. Planned changes are tracked in `CHANGELOG.md`.
 
 - Architecture: `docs/ARCHITECTURE.md`
 - Release process: `RELEASE.md`

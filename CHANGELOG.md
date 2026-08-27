@@ -6,6 +6,12 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-26
+
+### Added
+
+- Added a visible backup management panel with Drive connection status, automatic scheduling, manual backup and restore actions, local snapshots, and optional encryption controls.
+
 ### Changed
 
 - Rewrote the backup and recovery guide and the historical development record in English.
