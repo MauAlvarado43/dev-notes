@@ -9,6 +9,9 @@ import '@/presentation/webview/styles/base.css';
 import '@/presentation/webview/styles/markdown.css';
 import '@/presentation/webview/styles/editor.css';
 import { renderAttachments } from './attachments';
+import { EditorSync } from './sync';
+
+const sync = new EditorSync();
 
 const COPY_FEEDBACK_MS = 1200;
 /** Sentinel that marks where a message places an inline element. */
@@ -92,7 +95,7 @@ root.append(topbar, attachments, readLayout, editLayout);
 editor.addEventListener('input', () => {
   updateWordCount();
   setStatus('saving', t('editor.statusSaving'));
-  post({ type: 'edit', text: editor.value });
+  post({ type: 'edit', text: editor.value, revision: sync.edit() });
 });
 
 editor.addEventListener('keydown', (event) => {
@@ -103,7 +106,7 @@ editor.addEventListener('keydown', (event) => {
   }
   if (isShortcut(event, 's')) {
     event.preventDefault();
-    post({ type: 'edit', text: editor.value });
+    post({ type: 'edit', text: editor.value, revision: sync.edit() });
     post({ type: 'save' });
   }
   if (isShortcut(event, 'e')) {
@@ -123,6 +126,7 @@ window.addEventListener('keydown', (event) => {
 onHostMessage<EditorHostMessage>((message) => {
   switch (message.type) {
     case 'update':
+      if (!sync.accept(message.revision, message.updateId)) break;
       setLocale(message.locale);
       eyebrow.textContent = message.notebook;
       title.textContent = message.title;
@@ -137,6 +141,7 @@ onHostMessage<EditorHostMessage>((message) => {
       setStatus(message.dirty ? 'dirty' : '', message.dirty ? t('editor.statusDirty') : t('editor.statusSaved'));
       break;
     case 'saved':
+      if (message.revision !== sync.revision || message.text !== editor.value) break;
       setStatus('', t('editor.statusSaved'));
       break;
     case 'error':

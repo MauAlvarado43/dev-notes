@@ -35,6 +35,8 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
     panel.webview.html = this.html(panel.webview);
 
     let disposed = false;
+    let revision = 0;
+    let updateId = 0;
 
     const post = async (message: EditorHostMessage): Promise<void> => {
       if (!disposed) await panel.webview.postMessage(message);
@@ -44,6 +46,8 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
       const text = document.getText();
       await post({
         type: 'update',
+        revision,
+        updateId: ++updateId,
         locale: resolveLocale(),
         notebook: path.basename(path.dirname(note.fsPath)),
         title: noteTitle(path.basename(note.fsPath)),
@@ -61,11 +65,11 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
     });
 
     const changed = vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.uri.toString() === document.uri.toString() && !writer.isApplying) void postUpdate();
+      if (event.document.uri.toString() === document.uri.toString() && !writer.isEcho(event.document.getText())) void postUpdate();
     });
 
     const saved = vscode.workspace.onDidSaveTextDocument((savedDocument) => {
-      if (savedDocument.uri.toString() === document.uri.toString()) void post({ type: 'saved' });
+      if (savedDocument.uri.toString() === document.uri.toString()) void post({ type: 'saved', text: savedDocument.getText(), revision });
     });
 
     const messages = panel.webview.onDidReceiveMessage(async (message: EditorClientMessage) => {
@@ -75,6 +79,7 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
             await postUpdate();
             break;
           case 'edit':
+            revision = message.revision;
             void writer.write(message.text);
             break;
           case 'save':

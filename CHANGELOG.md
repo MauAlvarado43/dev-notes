@@ -6,6 +6,18 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-09-07
+
+### Fixed
+
+- Delayed note editor updates no longer overwrite newer typing or move the cursor during autosave. Updates are matched to the latest local edit, and snapshots arriving out of order are discarded.
+- Delayed save notifications no longer mark newer, unsaved text as saved.
+
+### Validation
+
+- `npm run check`: 56 tests, TypeScript validation, and production bundles.
+- Regression tests cover delayed typing echoes, out-of-order snapshots, initial loading during typing, and subsequent external updates. Interactive validation inside VS Code remains pending.
+
 ## [0.9.0] - 2026-08-26
 
 ### Added

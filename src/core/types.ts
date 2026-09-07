@@ -118,7 +118,7 @@ export type SidebarHostMessage =
 /** Messages the note editor webview sends to the extension host. */
 export type EditorClientMessage =
   | { type: 'ready' }
-  | { type: 'edit'; text: string }
+  | { type: 'edit'; text: string; revision: number }
   | { type: 'save' }
   | { type: 'copy'; text: string }
   | { type: 'openLink'; href: string }
@@ -130,6 +130,8 @@ export type EditorClientMessage =
 export type EditorHostMessage =
   | {
       type: 'update';
+      revision: number;
+      updateId: number;
       locale: AppLocale;
       notebook: string;
       title: string;
@@ -138,7 +140,7 @@ export type EditorHostMessage =
       dirty: boolean;
       attachments: NoteAttachment[];
     }
-  | { type: 'saved' }
+  | { type: 'saved'; text: string; revision: number }
   | { type: 'error' };
 
 /** Messages the board webview sends to the extension host. */
