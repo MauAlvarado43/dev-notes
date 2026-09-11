@@ -9,7 +9,7 @@ import '@/presentation/webview/styles/base.css';
 import '@/presentation/webview/styles/markdown.css';
 import '@/presentation/webview/styles/editor.css';
 import { renderAttachments } from './attachments';
-import { EditorSync } from './sync';
+import { EditorSync, mapTextPosition } from './sync';
 
 const sync = new EditorSync();
 
@@ -123,14 +123,25 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
-onHostMessage<EditorHostMessage>((message) => {
+onHostMessage<EditorHostMessage>(receiveHostMessage);
+
+const bootstrap = (globalThis as typeof globalThis & { __DEV_NOTES_BOOTSTRAP__?: EditorHostMessage })
+  .__DEV_NOTES_BOOTSTRAP__;
+delete (globalThis as typeof globalThis & { __DEV_NOTES_BOOTSTRAP__?: EditorHostMessage }).__DEV_NOTES_BOOTSTRAP__;
+if (bootstrap) receiveHostMessage(bootstrap);
+
+setMode(readState<PersistedState>().mode === 'edit' ? 'edit' : 'read');
+updateWordCount();
+post({ type: 'ready' });
+
+function receiveHostMessage(message: EditorHostMessage): void {
   switch (message.type) {
     case 'update':
       if (!sync.accept(message.revision, message.updateId)) break;
       setLocale(message.locale);
       eyebrow.textContent = message.notebook;
       title.textContent = message.title;
-      if (editor.value !== message.text) editor.value = message.text;
+      if (editor.value !== message.text) replaceEditorText(message.text);
       setRendered(message.rendered);
       renderAttachments(attachments, message.title, message.attachments, {
         open: (name) => post({ type: 'openAttachment', name }),
@@ -148,11 +159,7 @@ onHostMessage<EditorHostMessage>((message) => {
       setStatus('error', t('editor.statusError'));
       break;
   }
-});
-
-setMode(readState<PersistedState>().mode === 'edit' ? 'edit' : 'read');
-updateWordCount();
-post({ type: 'ready' });
+}
 
 function setMode(mode: Mode, focusEditor = false): void {
   const editing = mode === 'edit';
@@ -163,10 +170,21 @@ function setMode(mode: Mode, focusEditor = false): void {
   readButton.setAttribute('aria-selected', String(!editing));
   editButton.setAttribute('aria-selected', String(editing));
   writeState<PersistedState>({ mode });
-  if (editing && focusEditor) {
-    editor.focus();
-    editor.setSelectionRange(editor.value.length, editor.value.length);
-  }
+  if (editing && focusEditor) editor.focus();
+}
+
+function replaceEditorText(text: string): void {
+  const previous = editor.value;
+  const selectionStart = mapTextPosition(previous, text, editor.selectionStart);
+  const selectionEnd = mapTextPosition(previous, text, editor.selectionEnd);
+  const direction = editor.selectionDirection;
+  const scrollTop = editor.scrollTop;
+  const scrollLeft = editor.scrollLeft;
+
+  editor.value = text;
+  editor.setSelectionRange(selectionStart, selectionEnd, direction);
+  editor.scrollTop = scrollTop;
+  editor.scrollLeft = scrollLeft;
 }
 
 /** The host renders Markdown with raw HTML disabled, so the output is inert. */

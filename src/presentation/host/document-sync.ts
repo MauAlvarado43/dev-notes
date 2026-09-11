@@ -72,7 +72,9 @@ export class DocumentWriter {
     if (this.applying) return;
     this.applying = true;
     try {
+      let handledPendingText = false;
       while (this.pending !== undefined) {
+        handledPendingText = true;
         const next = this.pending;
         this.pending = undefined;
         if (next === this.document.getText()) continue;
@@ -84,6 +86,7 @@ export class DocumentWriter {
         this.written = next;
         if (!await vscode.workspace.applyEdit(edit)) throw new LocalizedError('errors.updateFailed');
       }
+      if (!handledPendingText) return;
       this.scheduleSave();
       await this.options.onApplied?.();
     } catch (error) {

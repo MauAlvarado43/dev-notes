@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { EditorSync } from '../src/presentation/webview/editor/sync';
+import { EditorSync, mapTextPosition } from '../src/presentation/webview/editor/sync';
 
 test('delayed typing echoes cannot replace newer text', () => {
   const sync = new EditorSync();
@@ -25,4 +25,12 @@ test('initial loading cannot overwrite typing and external updates still arrive'
   assert.equal(sync.accept(0, 1), false);
   assert.equal(sync.accept(revision, 2), true);
   assert.equal(sync.accept(revision, 3), true);
+});
+
+test('caret positions remain anchored when host text changes', () => {
+  assert.equal(mapTextPosition('', 'loaded note', 0), 0);
+  assert.equal(mapTextPosition('hello world', 'hello brave world', 6), 6);
+  assert.equal(mapTextPosition('hello world', 'hello brave world', 11), 17);
+  assert.equal(mapTextPosition('hello old world', 'hello new world', 8), 9);
+  assert.equal(mapTextPosition('short', 'sh', 99), 2);
 });

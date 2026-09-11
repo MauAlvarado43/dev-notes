@@ -6,6 +6,24 @@ Entries from `0.1.0` through `0.4.0` were reconstructed from the development his
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-09-11
+
+### Changed
+
+- The note editor receives its initial document with the first webview frame, without waiting for attachment discovery, so editing is ready immediately after opening a note.
+- Markdown preview updates are briefly debounced while typing, avoiding redundant host renders and attachment scans without delaying document writes or autosave.
+
+### Fixed
+
+- Opening a note or switching to edit mode no longer moves the caret to the end. Host updates preserve the current selection and editor scroll position.
+- A host snapshot can no longer carry an older document value with the latest edit revision and roll back recently typed characters.
+- Superseded document-writer tasks no longer trigger redundant preview updates or autosave scheduling.
+
+### Validation
+
+- `npm run check`: 57 tests, TypeScript validation, and production bundles.
+- Regression tests cover caret mapping across initial loads, insertions, replacements, and shortened documents. Interactive validation inside VS Code remains pending.
+
 ## [0.9.1] - 2026-09-07
 
 ### Fixed

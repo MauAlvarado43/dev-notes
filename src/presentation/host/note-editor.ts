@@ -11,6 +11,7 @@ import { DocumentWriter } from './document-sync';
 import { webviewHtml } from './webview-html';
 
 const ALLOWED_LINK_SCHEMES = ['https', 'http', 'mailto'];
+const PREVIEW_UPDATE_DELAY_MS = 120;
 
 /**
  * Opens notes in a reading-first Markdown surface with live editing, instead of
@@ -32,21 +33,27 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
       localResourceRoots: [this.context.extensionUri, this.storageRoot()]
     };
     panel.iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'media', 'dev-notes-mark.svg');
-    panel.webview.html = this.html(panel.webview);
 
     let disposed = false;
     let revision = 0;
-    let updateId = 0;
+    let updateId = 1;
+    let latestEditText: string | undefined;
+    let previewTimer: NodeJS.Timeout | undefined;
+
+    panel.webview.html = this.html(panel.webview, note, document, updateId);
 
     const post = async (message: EditorHostMessage): Promise<void> => {
       if (!disposed) await panel.webview.postMessage(message);
     };
 
-    const postUpdate = async (): Promise<void> => {
+    const postUpdate = async (requireLatestEdit = false): Promise<void> => {
+      const attachments = await this.attachments.list(note);
       const text = document.getText();
+      if (requireLatestEdit && latestEditText !== undefined && text !== latestEditText) return;
+      const snapshotRevision = revision;
       await post({
         type: 'update',
-        revision,
+        revision: snapshotRevision,
         updateId: ++updateId,
         locale: resolveLocale(),
         notebook: path.basename(path.dirname(note.fsPath)),
@@ -54,13 +61,22 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
         text,
         rendered: this.renderNote(text, panel.webview, note),
         dirty: document.isDirty,
-        attachments: await this.attachments.list(note)
+        attachments
       });
+    };
+
+    const schedulePreviewUpdate = (): void => {
+      if (disposed) return;
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(() => {
+        previewTimer = undefined;
+        void postUpdate(true);
+      }, PREVIEW_UPDATE_DELAY_MS);
     };
 
     const writer = new DocumentWriter(document, {
       autoSave: autoSaveEnabled,
-      onApplied: postUpdate,
+      onApplied: schedulePreviewUpdate,
       onError: () => post({ type: 'error' })
     });
 
@@ -76,10 +92,11 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
       try {
         switch (message.type) {
           case 'ready':
-            await postUpdate();
+            await postUpdate(true);
             break;
           case 'edit':
             revision = message.revision;
+            latestEditText = message.text;
             void writer.write(message.text);
             break;
           case 'save':
@@ -111,6 +128,7 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
 
     panel.onDidDispose(() => {
       disposed = true;
+      if (previewTimer) clearTimeout(previewTimer);
       writer.dispose();
       changed.dispose();
       saved.dispose();
@@ -198,14 +216,32 @@ export class NoteEditorProvider implements vscode.CustomTextEditorProvider {
     return resolveInsideRoot(this.storageRoot(), note, reference);
   }
 
-  private html(webview: vscode.Webview): string {
+  private html(
+    webview: vscode.Webview,
+    note: vscode.Uri,
+    document: vscode.TextDocument,
+    updateId: number
+  ): string {
+    const text = document.getText();
     return webviewHtml({
       webview,
       extensionUri: this.context.extensionUri,
       locale: resolveLocale(),
       bundle: 'editor',
       title: 'Dev Notes',
-      allowImages: true
+      allowImages: true,
+      bootstrap: {
+        type: 'update',
+        revision: 0,
+        updateId,
+        locale: resolveLocale(),
+        notebook: path.basename(path.dirname(note.fsPath)),
+        title: noteTitle(path.basename(note.fsPath)),
+        text,
+        rendered: this.renderNote(text, webview, note),
+        dirty: document.isDirty,
+        attachments: []
+      } satisfies EditorHostMessage
     });
   }
 }
